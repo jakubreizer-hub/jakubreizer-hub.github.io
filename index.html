@@ -337,7 +337,7 @@
     <div class="demo-item">
       <h3 class="demo-title">Wizytówka po angielsku</h3>
       <div class="demo-frame" data-yt="k8tzkVSZcL4" onclick="loadYT(this)" role="button" tabindex="0" aria-label="Odtwórz: Wizytówka po angielsku">
-        <div class="demo-thumb" style="background-image:url('https://i.ytimg.com/vi/k8tzkVSZcL4/maxresdefault.jpg')"></div>
+        <div class="demo-thumb" style="background-image:url('https://i.ytimg.com/vi/k8tzkVSZcL4/hqdefault.jpg')"></div>
         <div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>
       </div>
     </div>
@@ -490,14 +490,33 @@
   // close mobile menu on link click
   document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
+  function resetYT(el){
+    const id=el.getAttribute('data-yt');
+    const label=el.getAttribute('aria-label')||'';
+    el.dataset.loaded='';
+    el.style.cursor='pointer';
+    el.setAttribute('onclick','loadYT(this)');
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.innerHTML=''+
+      '<div class="demo-thumb" style="background-image:url(\'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg\')"></div>'+
+      '<div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>';
+  }
   function loadYT(el){
     const id=el.getAttribute('data-yt');
     if(!id||el.dataset.loaded)return;
+    // zatrzymaj inne grające filmy — przywróć im miniatury
+    document.querySelectorAll('.demo-frame[data-yt]').forEach(other=>{
+      if(other!==el && other.dataset.loaded) resetYT(other);
+    });
     el.dataset.loaded='1';
-    el.innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0" title="Film" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+    // odtwarzacz w pełni klikalny — usuń przechwytywanie kliknięć z kontenera
+    el.removeAttribute('onclick');
+    el.style.cursor='default';
+    el.innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0" title="Film" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
   }
   document.querySelectorAll('.demo-frame[data-yt]').forEach(f=>{
-    f.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();loadYT(f);}});
+    f.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!f.dataset.loaded){e.preventDefault();loadYT(f);}});
   });
   // LIGHTBOX — podgląd zdjęć na pełnym ekranie ze strzałkami
   (function(){
