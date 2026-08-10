@@ -1,70 +1,589 @@
-/* ===================================================================
-   ROLE JAKUBA REIZERA
-   ===================================================================
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jakub Reizer - Aktor | Kraków · Warszawa</title>
+<meta name="description" content="Jakub Reizer - aktor teatralny, filmowy i telewizyjny z ponad 10-letnim doświadczeniem. Teatr, film, telewizja, a od niedawna motion capture tworzone z pomocą AI. Kraków · Warszawa.">
+<meta property="og:site_name" content="Jakub Reizer">
+<meta property="og:title" content="Jakub Reizer - Aktor">
+<meta property="og:description" content="Aktor teatralny, filmowy i telewizyjny. Ponad 10 lat doświadczenia, a od niedawna motion capture z pomocą AI. Kraków · Warszawa.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.jakubreizer.pl">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e0d0b;
+    --ink-soft:#17150f;
+    --panel:#171513;
+    --cream:#efe9dd;
+    --cream-dim:#b8b1a2;
+    --muted:#8a8474;
+    --brass:#9db451;
+    --brass-bright:#b3c96a;
+    --line:rgba(157,180,81,.20);
+    --line-soft:rgba(239,233,221,.09);
+    --display:'Fraunces',Georgia,serif;
+    --body:'Inter',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:var(--body);
+    font-weight:300;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--brass);color:var(--ink)}
 
-   JAK EDYTOWAĆ (bez znajomości kodu):
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px clamp(20px,5vw,64px);
+    background:linear-gradient(to bottom,rgba(14,13,11,.85),rgba(14,13,11,0));
+    backdrop-filter:blur(2px);
+    transition:background .4s ease;
+  }
+  nav.solid{background:rgba(14,13,11,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+  /* całe menu (logo + linki) pojawia się dopiero po zjechaniu w dół, razem z ciemną ramką nav */
+  .brand,.nav-links,.nav-toggle{opacity:0;transform:translateY(-6px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+  nav.solid .brand,nav.solid .nav-links,nav.solid .nav-toggle{opacity:1;transform:none;pointer-events:auto}
+  .brand{font-family:var(--display);font-size:1.3rem;font-weight:500;letter-spacing:.01em}
+  .brand span{color:var(--brass)}
+  .nav-links{display:flex;gap:clamp(14px,2.4vw,34px);font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-weight:400}
+  .nav-links a{color:var(--cream-dim);transition:color .25s;position:relative;padding-bottom:3px}
+  .nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--brass);transition:width .3s}
+  .nav-links a:hover{color:var(--cream)}
+  .nav-links a:hover::after{width:100%}
+  .nav-toggle{display:none;background:none;border:none;color:var(--cream);cursor:pointer;font-size:1.4rem}
 
-   Każda rola to jedna linia w formacie:
-       { tytul: "Tytuł produkcji", postac: "Twoja postać" },
+  /* ---------- HERO / KEN BURNS ---------- */
+  .hero{position:relative;height:100svh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+  .kb-stage{position:absolute;inset:0;z-index:0}
+  .kb-slide{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    opacity:0;
+    animation:kbFade 32s infinite;
+    will-change:transform,opacity;
+  }
+  .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform}
+  /* Placeholder gradients — PODMIEŃ na własne zdjęcia: background-image:url('foto1.jpg') */
+  .kb-slide:nth-child(1){animation-delay:0s}
+  .kb-slide:nth-child(1) .kb-img{background:url('foto1.jpg') center top/cover;animation:kbZoom1 32s infinite}
+  .kb-slide:nth-child(2){animation-delay:8s}
+  .kb-slide:nth-child(2) .kb-img{background:url('foto2.jpg') center top/cover;animation:kbZoom2 32s infinite;animation-delay:8s}
+  .kb-slide:nth-child(3){animation-delay:16s}
+  .kb-slide:nth-child(3) .kb-img{background:url('foto3.jpg') center top/cover;animation:kbZoom3 32s infinite;animation-delay:16s}
+  .kb-slide:nth-child(4){animation-delay:24s}
+  .kb-slide:nth-child(4) .kb-img{background:url('foto4.jpg') center top/cover;animation:kbZoom4 32s infinite;animation-delay:24s}
 
-   - Zwróć uwagę na cudzysłowy "..." i przecinek na końcu linii — muszą zostać.
-   - Żeby DODAĆ rolę: skopiuj dowolną linię, wklej w nowym miejscu, zmień tekst.
-   - Żeby USUNĄĆ rolę: skasuj całą jej linię.
-   - Żeby ZMIENIĆ kolejność: przenoś linie w górę/dół (kolejność na stronie = kolejność tutaj).
-   - Jeśli nie grasz konkretnej postaci (np. rola epizodyczna), wpisz w postac: "—"
-   - Możesz dodać dopisek w tytule, np. "(serial)" albo "(Molier)" — po prostu w tytule.
+  @keyframes kbFade{
+    0%{opacity:0}
+    3%{opacity:1}
+    22%{opacity:1}
+    27%{opacity:0}
+    100%{opacity:0}
+  }
+  @keyframes kbZoom1{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.15) translate(-2%,-2%)}}
+  @keyframes kbZoom2{0%{transform:scale(1.13) translate(2%,1%)}100%{transform:scale(1) translate(0,0)}}
+  @keyframes kbZoom3{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.16) translate(2%,-2%)}}
+  @keyframes kbZoom4{0%{transform:scale(1.12) translate(-2%,1%)}100%{transform:scale(1) translate(0,0)}}
+  /* mobile: sam delikatny zoom, bez przesuwania (translate powodował skakanie) */
+  @keyframes kbZoomMobile{0%{transform:scale(1)}100%{transform:scale(1.08)}}
 
-   Po edycji: ZAPISZ plik (Ctrl+S) i odśwież stronę (Ctrl+F5).
-   =================================================================== */
+  .hero-scrim{position:absolute;inset:0;z-index:1;
+    background:radial-gradient(120px 90px at top left,rgba(14,13,11,.92),transparent 75%),
+               linear-gradient(to top,rgba(14,13,11,.10) 0%,rgba(14,13,11,.2) 45%,rgba(14,13,11,.2) 100%),
+               linear-gradient(to right,rgba(14,13,11,.55),transparent 60%)}
+  .hero-inner{position:relative;z-index:2;padding:0 clamp(20px,5vw,64px);width:100%}
+  .hero-eyebrow{font-size:clamp(1rem,1.8vw,1.35rem);letter-spacing:.4em;text-transform:uppercase;color:var(--brass);margin-bottom:20px;
+    opacity:0;animation:rise .9s .3s forwards}
+  .hero h1{font-family:var(--display);font-weight:500;line-height:.94;letter-spacing:-.01em;
+    font-size:clamp(3.2rem,11vw,9rem);margin-bottom:24px}
+  .hero h1 .l1{display:block;opacity:0;animation:rise 1s .45s forwards}
+  .hero h1 .l2{display:block;color:var(--brass);font-style:normal;font-weight:500;opacity:0;animation:rise 1s .6s forwards}
+  .hero-tag{max-width:38ch;color:var(--cream-dim);font-size:clamp(1rem,1.7vw,1.18rem);margin-bottom:34px;
+    opacity:0;animation:rise 1s .8s forwards}
+  .hero-tag .tag-lead{color:var(--cream);font-weight:600;font-size:1.28em;letter-spacing:.02em}
+  .hero-phys{display:flex;gap:clamp(20px,4vw,48px);flex-wrap:wrap;margin-bottom:34px;
+    opacity:0;animation:rise 1s .9s forwards}
+  .hero-phys div b{font-family:var(--display);color:var(--brass);font-size:1.3rem;display:block;line-height:1.1}
+  .hero-phys div span{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim)}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap;opacity:0;animation:rise 1s .95s forwards}
+  .hero-contact{display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;margin-top:28px;
+    opacity:0;animation:rise 1s 1.05s forwards}
+  .hero-contact a{font-family:var(--display);font-style:italic;color:var(--brass);
+    font-size:1.2rem;transition:.25s}
+  .hero-contact a:hover{color:#c5dd7e}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12.6px 21px;font-size:.66rem;letter-spacing:.22em;text-indent:.22em;
+    text-transform:uppercase;font-weight:500;transition:.3s;border:1px solid var(--brass)}
+  .btn-fill{background:var(--brass);color:var(--ink)}
+  .btn-fill:hover{background:var(--brass-bright);transform:translateY(-2px)}
+  .btn-ghost{color:var(--cream);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--brass);color:var(--brass)}
+  .scroll-hint{position:absolute;bottom:26px;right:clamp(20px,5vw,64px);z-index:2;
+    color:var(--muted);opacity:0;animation:rise 1s 1.2s forwards}
+  .scroll-hint svg{display:block;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(6px);opacity:1}}
 
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 
-// ===== FILM I SERIAL =====
-const ROLE_FILM = [
-  { tytul: "Rave to the Grave 48h" ,               postac: "Szef" },
-  { tytul: "Szapital św. Anny",                    postac: "Robert Sas" },
-  { tytul: "Tato tato",                            postac: "Tomek" },
-  { tytul: "Shit happens",                         postac: "Kamil" },
-  { tytul: "Królowie (serial)",                    postac: "Jerzy Semenowicz" },
-  { tytul: "Malanowski. Nowe rozdanie (serial)",   postac: "—" },
-  { tytul: "Lombard (serial)",                     postac: "—" },
-  { tytul: "Głód wolności",                        postac: "Tex" },
-  { tytul: "Chronos",                              postac: "Młody Chronowski" },
-  { tytul: "Obok",                                 postac: "Ojciec" },
-  { tytul: "Kiedy zachodzą słońca",                postac: "por. Ignacy" },
-  { tytul: "Krwista nicość",                       postac: "Starszy najemnik" },
-  { tytul: "Work in progress",                     postac: "Andrzej" },
-  { tytul: "Nicland (teatr telewizji)",            postac: "Pogo" },
-  { tytul: "Rendez Vous 2. Przebudzenie endorfin", postac: "Mistrz" },
-  { tytul: "Enduring Freedom",                     postac: "porucznik Kruk" },
-  { tytul: "Hubal",                                postac: "porucznik Bem" },
-];
+  /* ---------- SECTIONS ---------- */
+  section{padding:clamp(48px,7vh,80px) clamp(20px,5vw,64px);position:relative;background:#171513}
+  .hero + section::before,section + section::before{content:'';position:absolute;top:0;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);
+    height:1px;background:var(--brass);opacity:.3}
+  .sec-label{font-size:.9rem;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
+    display:flex;align-items:center;gap:14px;margin-bottom:40px}
+  .sec-label::before{content:'';width:34px;height:1px;background:var(--brass)}
+  .sec-h{font-family:var(--display);font-weight:400;font-size:clamp(2rem,5vw,3.4rem);
+    line-height:1.05;letter-spacing:-.01em;margin-bottom:28px}
 
+  /* ABOUT */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,80px);align-items:start}
+  .about-lead{font-size:clamp(1rem,1.7vw,1.18rem);font-weight:300;line-height:1.6;color:var(--cream-dim)}
+  .about-lead em{font-family:var(--display);font-style:italic;color:var(--brass)}
+  .about-body p{color:var(--cream-dim);margin-bottom:18px;font-size:1rem}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:26px}
+  .stat{background:transparent;border:1px solid var(--line);padding:13px 18px}
+  .stat b{font-family:var(--display);display:block;font-size:1.4rem;color:var(--brass);font-weight:500;line-height:1}
+  .stat span{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;display:block}
 
-// ===== TEATR =====
-const ROLE_TEATR = [
-  { tytul: "Stosunki Prawne (S. Turkiewicz)",      postac: "On 1" }, 
-  { tytul: "Artyści na szlaku (M. Dewera)",        postac: "różne postaci" },
-  { tytul: "Łysa śpiewaczka (E. Ionesco)",         postac: "Pan Martin" },
-  { tytul: "Napis (G. Sibleyras)",                 postac: "Pan Cholley" },
-  { tytul: "Pocieszne wykwintnisie (Molier)",      postac: "Du Croisy" },
-  { tytul: "Miłość w dużych miastach (J.J. Należyty)", postac: "Mietek" },
-  { tytul: "Biedermann i podpalacze (M. Frisch)",  postac: "Policjant" },
-  { tytul: "Libański Łącznik (L. Lagerbe)",        postac: "Jean" },
-  { tytul: "A date to remember (I. Alsop, ang.)",  postac: "Ben" },
-  { tytul: "Dinner party twist (D. Słowioczek, ang.)", postac: "Timo" },
-];
+  /* SKILLS */
+  .skills-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-top:48px}
+  .chip{border:1px solid var(--line);padding:8px 16px;font-size:.8rem;color:var(--cream-dim);
+    border-radius:2px}
+  .phys{display:flex;gap:clamp(20px,4vw,48px);flex-wrap:wrap;margin-top:34px;padding-top:30px;border-top:1px solid var(--line-soft)}
+  .phys div b{font-family:var(--display);color:var(--brass);font-size:1.3rem;display:block}
+  .phys div span{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 
+  /* GALLERY */
+  .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:8px}
+  .gal-item{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--panel);border:1px solid var(--line-soft);cursor:pointer}
+  .gal-item .gal-img{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s ease}
+  .gal-item:hover .gal-img{transform:scale(1.06)}
+  /* placeholdery galerii — PODMIEŃ na background-image:url('...') */
+  .gal-item:nth-child(4n+1) .gal-img{background:linear-gradient(135deg,#2a2418,#14120d)}
+  .gal-item:nth-child(4n+2) .gal-img{background:linear-gradient(135deg,#25211b,#12100b)}
+  .gal-item:nth-child(4n+3) .gal-img{background:linear-gradient(135deg,#2f2717,#14120d)}
+  .gal-item:nth-child(4n) .gal-img{background:linear-gradient(135deg,#221f19,#100e0a)}
+  .gal-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(14,13,11,.5),transparent 50%);opacity:0;transition:opacity .4s}
+  .gal-item:hover::after{opacity:1}
 
-/* === PONIŻEJ NIE EDYTUJ — to kod, który wstawia role na stronę === */
-function wstawRole(lista, elId){
-  const el = document.getElementById(elId);
-  if(!el) return;
-  el.innerHTML = lista.map(r =>
-    '<div class="cred"><span class="cred-title">'+r.tytul+'</span>'+
-    '<span class="cred-role">'+r.postac+'</span></div>'
-  ).join('');
-}
-document.addEventListener('DOMContentLoaded', function(){
-  wstawRole(ROLE_FILM,  'lista-film');
-  wstawRole(ROLE_TEATR, 'lista-teatr');
-});
+  /* DEMO */
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:8px}
+  .demo-title{font-family:var(--display);font-weight:500;font-size:1.15rem;color:var(--cream);margin-bottom:14px}
+  .demo-frame{position:relative;aspect-ratio:16/9;background:var(--panel);border:1px solid var(--line);overflow:hidden;cursor:pointer}
+  .demo-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .demo-thumb{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s ease}
+  .demo-frame:hover .demo-thumb{transform:scale(1.04)}
+  .demo-frame::before{content:'';position:absolute;inset:0;background:rgba(14,13,11,.25);transition:background .3s;z-index:1}
+  .demo-frame.loaded::before{display:none}
+  .demo-frame.loaded iframe{z-index:3}
+  .demo-frame.loaded .demo-thumb,.demo-frame.loaded .demo-play{display:none}
+  .demo-frame:hover::before{background:rgba(14,13,11,.1)}
+  .demo-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;
+    opacity:.9;transition:opacity .3s,transform .3s}
+  .demo-frame:hover .demo-play{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  .demo-frame:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .demo-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--muted);text-align:center;padding:20px}
+  .demo-ph svg{opacity:.6}
+  .demo-ph b{font-family:var(--display);color:var(--cream-dim);font-size:1.1rem;font-weight:400}
+  .demo-ph span{font-size:.78rem;letter-spacing:.05em}
+
+  /* CREDITS */
+  .cred-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,64px);align-items:start}
+  .cred-group{margin-bottom:0}
+  .cred-group h3{font-family:var(--display);font-size:1.3rem;font-weight:500;color:var(--cream);
+    margin-bottom:22px;display:flex;align-items:baseline;gap:12px}
+  .cred-group h3 i{font-style:normal;font-size:.7rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  .cred-list{display:grid;gap:0;border-top:1px solid var(--line)}
+  .cred{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:baseline;
+    background:transparent;padding:15px 2px;border-bottom:1px solid var(--line)}
+  .cred-title{font-size:1rem;color:var(--cream)}
+  .cred-role{font-size:.85rem;color:var(--cream-dim);text-align:right;font-style:italic}
+
+  /* AI NICHE */
+  .niche-inner{max-width:760px}
+  .niche-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,64px);align-items:start;margin-top:8px}
+  .niche-text{color:var(--cream-dim);font-size:clamp(1rem,1.7vw,1.18rem);line-height:1.7}
+  .niche .sec-h em{font-family:var(--display);font-style:italic;color:var(--brass)}
+  .niche p{color:var(--cream-dim);font-size:clamp(1rem,1.7vw,1.18rem);line-height:1.7}
+
+  /* CONTACT */
+  .contact{text-align:center}
+  .contact-line{display:flex;align-items:baseline;justify-content:center;gap:24px;flex-wrap:wrap;margin:10px 0 24px}
+  .contact-phone{font-family:var(--display);font-style:italic;color:var(--brass);
+    font-size:clamp(1.1rem,2.2vw,1.5rem);transition:.25s}
+  .contact-phone:hover{color:var(--brass-bright)}
+  .contact-mail-sm{font-family:var(--display);font-style:italic;color:var(--brass);
+    font-size:clamp(1.1rem,2.2vw,1.5rem);transition:.25s}
+  .contact-mail-sm:hover{color:var(--brass-bright)}
+  .contact-meta{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;color:var(--cream-dim);
+    font-size:.95rem;margin-bottom:36px}
+  .contact-meta a:hover{color:var(--brass)}
+  .socials{display:flex;gap:18px;justify-content:center}
+  .socials a{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--cream-dim);transition:.3s}
+  .socials a:hover{border-color:var(--brass);color:var(--brass);transform:translateY(-3px)}
+
+  footer{padding:32px clamp(20px,5vw,64px);text-align:center;font-size:.72rem;
+    letter-spacing:.12em;color:var(--muted);border-top:1px solid var(--line-soft)}
+
+  /* LIGHTBOX */
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(8,7,6,.95);
+    display:none;align-items:center;justify-content:center;padding:40px}
+  .lb.open{display:flex}
+  .lb-img{max-width:90vw;max-height:88vh;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .lb-close,.lb-prev,.lb-next{position:absolute;background:none;border:none;color:var(--cream);
+    cursor:pointer;transition:color .2s;user-select:none}
+  .lb-close{top:20px;right:28px;font-size:2.6rem;line-height:1}
+  .lb-prev,.lb-next{top:50%;transform:translateY(-50%);font-size:2.4rem;padding:20px}
+  .lb-prev{left:12px}.lb-next{right:12px}
+  .lb-close:hover,.lb-prev:hover,.lb-next:hover{color:var(--brass)}
+  .lb-counter{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+    font-size:.8rem;letter-spacing:.2em;color:var(--cream-dim)}
+  @media(max-width:600px){.lb-prev,.lb-next{font-size:1.8rem;padding:12px}}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:820px){
+    .kb-slide .kb-img{background-position:55% top!important}
+    /* na telefonie łagodniejszy zoom Ken Burns — mniej "skakania" */
+    .kb-slide:nth-child(1) .kb-img,.kb-slide:nth-child(2) .kb-img,
+    .kb-slide:nth-child(3) .kb-img,.kb-slide:nth-child(4) .kb-img{
+      animation:kbZoomMobile 32s infinite!important}
+    .kb-slide:nth-child(2) .kb-img{animation-delay:8s!important}
+    .kb-slide:nth-child(3) .kb-img{animation-delay:16s!important}
+    .kb-slide:nth-child(4) .kb-img{animation-delay:24s!important}
+    .about-grid{grid-template-columns:1fr}
+    .cred-cols{grid-template-columns:1fr;gap:44px}
+    .niche-grid{grid-template-columns:1fr;gap:34px}
+    .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;
+      background:rgba(14,13,11,.97);padding:20px 28px;gap:18px;border:1px solid var(--line-soft);border-radius:0 0 0 8px}
+    .nav-links.open{display:flex}
+    .nav-toggle{display:block}
+    .scroll-hint{display:none}
+    /* na telefonie brak animacji pojawiania — wszystko od razu widoczne (pewność, zero czarnych sekcji) */
+    .reveal{opacity:1!important;transform:none!important}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .kb-slide,.kb-slide .kb-img{animation-duration:.01ms!important;animation:kbFade 24s infinite}
+    .kb-slide .kb-img{transform:none!important;animation:none}
+    .hero-eyebrow,.hero h1 .l1,.hero h1 .l2,.hero-tag,.hero-cta,.scroll-hint{animation:none;opacity:1}
+    .reveal{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#top" class="brand">Jakub <span>Reizer</span></a>
+  <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
+  <div class="nav-links" id="navlinks">
+    <a href="#demo">Demo</a>
+    <a href="#galeria">Galeria</a>
+    <a href="#about">O mnie</a>
+    <a href="#credits">Role</a>
+    <a href="#niche">AI</a>
+    <a href="#contact">Kontakt</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="kb-stage">
+    <!-- PODMIEŃ placeholdery: w .kb-img wstaw background-image:url('twoje-zdjecie.jpg') -->
+    <div class="kb-slide"><div class="kb-img"></div></div>
+    <div class="kb-slide"><div class="kb-img"></div></div>
+    <div class="kb-slide"><div class="kb-img"></div></div>
+    <div class="kb-slide"><div class="kb-img"></div></div>
+  </div>
+  <div class="hero-scrim"></div>
+  <div class="hero-inner">
+    <h1><span class="l1">Jakub</span><span class="l2">Reizer</span></h1>
+    <p class="hero-tag"><strong class="tag-lead">Aktor</strong> - ponad 10 lat na scenie i przed kamerą. Teatr, film, telewizja, a od niedawna także motion capture tworzone z pomocą AI.</p>
+    <div class="hero-phys">
+      <div><b>181 cm</b><span>Wzrost</span></div>
+      <div><b>81 kg</b><span>Waga</span></div>
+      <div><b>Ciemny blond</b><span>Włosy</span></div>
+      <div><b>Niebieskie</b><span>Oczy</span></div>
+    </div>
+    <div class="hero-cta">
+      <a href="#demo" class="btn btn-ghost">Demo</a>
+      <a href="#galeria" class="btn btn-ghost">Galeria</a>
+      <a href="https://www.instagram.com/jakub_reizer/" target="_blank" rel="noopener" class="btn btn-ghost">Instagram</a>
+      <a href="https://www.filmpolski.pl/fp/index.php?osoba=11156547" target="_blank" rel="noopener" class="btn btn-ghost" id="filmpolski-link">FilmPolski</a>
+    </div>
+    <div class="hero-contact">
+      <a href="tel:+48694329630" class="contact-phone">+48 694 329 630</a>
+      <a href="mailto:jakubreizer@gmail.com" class="contact-mail-sm">jakubreizer@gmail.com</a>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-label="Przewiń w dół">
+    <svg width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M11 2v26"/><path d="m3 21 8 8 8-8"/></svg>
+  </div>
+</header>
+
+<!-- ============ DEMO ============ -->
+<section class="demo" id="demo">
+  <div class="sec-label reveal">Demo</div>
+  <h2 class="sec-h reveal">Showreel i wizytówka</h2>
+  <div class="demo-grid reveal">
+    <div class="demo-item">
+      <h3 class="demo-title">Showreel</h3>
+      <div class="demo-frame" data-yt="rgZIo1oweds" onclick="loadYT(this)" role="button" tabindex="0" aria-label="Odtwórz: Showreel 2024">
+        <div class="demo-thumb" style="background-image:url('https://i.ytimg.com/vi/rgZIo1oweds/maxresdefault.jpg')"></div>
+        <div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>
+      </div>
+    </div>
+    <div class="demo-item">
+      <h3 class="demo-title">Wizytówka po angielsku</h3>
+      <div class="demo-frame" data-yt="k8tzkVSZcL4" onclick="loadYT(this)" role="button" tabindex="0" aria-label="Odtwórz: Wizytówka po angielsku">
+        <div class="demo-thumb" style="background-image:url('https://i.ytimg.com/vi/k8tzkVSZcL4/hqdefault.jpg')"></div>
+        <div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery" id="galeria">
+  <div class="sec-label reveal">Galeria</div>
+  <h2 class="sec-h reveal">Headshoty i zdjęcia z planu</h2>
+  <div class="gal-grid reveal">
+    <!-- Galeria używa własnych, pionowych zdjęć foto5–foto18 (kadr 3:4). PODMIEŃ nazwy/pliki wedle potrzeby -->
+    <div class="gal-item" data-full="foto5.jpg"><div class="gal-img" style="background:url('foto5.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto6.jpg"><div class="gal-img" style="background:url('foto6.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto7.jpg"><div class="gal-img" style="background:url('foto7.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto8.jpg"><div class="gal-img" style="background:url('foto8.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto9.jpg"><div class="gal-img" style="background:url('foto9.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto10.jpg"><div class="gal-img" style="background:url('foto10.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto11.jpg"><div class="gal-img" style="background:url('foto11.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto12.jpg"><div class="gal-img" style="background:url('foto12.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto13.jpg"><div class="gal-img" style="background:url('foto13.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto14.jpg"><div class="gal-img" style="background:url('foto14.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto15.jpg"><div class="gal-img" style="background:url('foto15.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto16.jpg"><div class="gal-img" style="background:url('foto16.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto17.jpg"><div class="gal-img" style="background:url('foto17.jpg') center/cover"></div></div>
+    <div class="gal-item" data-full="foto18.jpg"><div class="gal-img" style="background:url('foto18.jpg') center/cover"></div></div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="sec-label reveal">O mnie</div>
+  <h2 class="sec-h reveal">Doświadczenie i warsztat</h2>
+  <div class="about-grid">
+    <div class="reveal">
+      <p class="about-lead">Aktor teatralny, filmowy i telewizyjny. Absolwent krakowskiej <em>ASP</em>, wydziału aktorskiego <em>KSA</em> oraz Akademii Filmowej <em>AMA</em>.</p>
+      <div class="stats">
+        <div class="stat"><b>10+</b><span>lat doświadczenia</span></div>
+        <div class="stat"><b>20+</b><span>ról filmowych</span></div>
+        <div class="stat"><b>10</b><span>produkcji teatralnych</span></div>
+        <div class="stat"><b>2</b><span>sceny teatralne</span></div>
+      </div>
+    </div>
+    <div class="about-body reveal">
+      <p>Na co dzień aktor Krakowskiego Teatru Komedia oraz Krakowskiej Sceny Klasycznej, działającej na deskach Teatru Praska 52 w Krakowie. Mam na koncie wiele ról filmowych, teatralnych i telewizyjnych - zajmuję się także dubbingiem.</p>
+      <p>Tancerz krakowskiego zespołu tańca irlandzkiego i szkockiego Comhlan oraz wieloletni członek grupy rekonstrukcji historycznej Małopolskiej Zgrai Sarmackiej. Trenowałem szermierkę artystyczną, gram na gitarze i śpiewam.</p>
+      <p>Rzemiosło aktorskie łączę dziś z nowym językiem obrazu - wizualami generowanymi z pomocą AI, które pozwalają opowiadać historie w formie, jakiej wcześniej nie było.</p>
+    </div>
+  </div>
+  <div class="skills-wrap reveal">
+    <span class="chip">Szermierka sceniczna</span>
+    <span class="chip">Przeszkolenie kaskaderskie</span>
+    <span class="chip">Broń palna (przeszkolenie)</span>
+    <span class="chip">Jazda konna (podstawy)</span>
+    <span class="chip">Taniec szkocki</span>
+    <span class="chip">Step irlandzki</span>
+    <span class="chip">Taniec towarzyski</span>
+    <span class="chip">Śpiew (tenor / baryton)</span>
+    <span class="chip">Gitara</span>
+    <span class="chip">Pianino (podstawy)</span>
+    <span class="chip">Angielski (bardzo dobry)</span>
+    <span class="chip">Niemiecki (podstawy)</span>
+    <span class="chip">Narty</span>
+    <span class="chip">Pływanie</span>
+    <span class="chip">Fotografia</span>
+    <span class="chip">Rysunek</span>
+    <span class="chip">Prawo jazdy kat. B</span>
+  </div>
+</section>
+
+<!-- ============ CREDITS ============ -->
+<section class="credits" id="credits">
+  <div class="sec-label reveal">Role</div>
+  <h2 class="sec-h reveal">Wybrane projekty</h2>
+
+  <div class="cred-cols">
+  <div class="cred-group reveal">
+    <h3>Film i serial <i>ekran</i></h3>
+    <div class="cred-list" id="lista-film"></div>
+  </div>
+
+  <div class="cred-group reveal">
+    <h3>Teatr <i>scena</i></h3>
+    <div class="cred-list" id="lista-teatr"></div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ AI NICHE ============ -->
+<section class="niche" id="niche">
+  <div class="sec-label reveal">AI w filmie</div>
+  <h2 class="sec-h reveal">Aktorstwo <em>spotyka</em> AI</h2>
+  <div class="niche-grid">
+    <div class="reveal">
+      <p class="niche-text">Aktorstwo to praca z emocją, obecnością i prawdą postaci. AI to nowe narzędzie obrazu. Łączę jedno z drugim - przenoszę autentyczną grę w wizuale generowane z pomocą sztucznej inteligencji, tworząc formy, których klasyczna produkcja nie umożliwia. To przestrzeń, w której rzemiosło i technologia pracują razem, zamiast się wykluczać.</p>
+      <div class="hero-cta" style="margin-top:34px">
+        <a href="https://www.instagram.com/jakub_reizer/" target="_blank" rel="noopener" class="btn btn-ghost">Zobacz na Instagramie</a>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="demo-frame" data-yt="ll8ge8tzenI" onclick="loadYT(this)" role="button" tabindex="0" aria-label="Odtwórz film AI">
+        <div class="demo-thumb" style="background-image:url('https://i.ytimg.com/vi/ll8ge8tzenI/maxresdefault.jpg')"></div>
+        <div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact" id="contact">
+  <div class="sec-label reveal" style="justify-content:center">Kontakt</div>
+  <h2 class="sec-h reveal">Porozmawiajmy o projektach</h2>
+  <div class="contact-line reveal">
+    <a href="tel:+48694329630" class="contact-phone">+48 694 329 630</a>
+    <a href="mailto:jakubreizer@gmail.com" class="contact-mail-sm">jakubreizer@gmail.com</a>
+  </div>
+  <div class="contact-meta reveal">
+    <span>Kraków &nbsp;/&nbsp; Warszawa</span>
+  </div>
+  <div class="socials reveal">
+    <a href="https://www.instagram.com/jakub_reizer/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a href="mailto:jakubreizer@gmail.com" aria-label="Email">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>© <span id="yr"></span> Jakub Reizer · Aktor</footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lb" aria-hidden="true">
+  <button class="lb-close" aria-label="Zamknij">&times;</button>
+  <button class="lb-prev" aria-label="Poprzednie">&#10094;</button>
+  <img class="lb-img" src="" alt="">
+  <button class="lb-next" aria-label="Następne">&#10095;</button>
+  <div class="lb-counter"></div>
+</div>
+
+<script>
+  // year
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  // nav solidify
+  const nav=document.getElementById('nav');
+  addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  // reveal — odporne na wysokie sekcje (np. galeria na telefonie) i szybki scroll
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  function revealVisible(){
+    document.querySelectorAll('.reveal:not(.in)').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      if(r.top < window.innerHeight*0.94 && r.bottom > 0){el.classList.add('in');io.unobserve(el);}
+    });
+  }
+  addEventListener('scroll',revealVisible,{passive:true});
+  // bezpiecznik okresowy: gwarantuje odsłonięcie tego, co jest w polu widzenia,
+  // nawet gdyby observer i scroll zawiodły (np. na niektórych telefonach)
+  let revChecks=0;
+  const revTimer=setInterval(()=>{
+    revealVisible();
+    if(++revChecks>40 || !document.querySelector('.reveal:not(.in)')) clearInterval(revTimer);
+  },250);
+  // close mobile menu on link click
+  document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
+  // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
+  function resetYT(el){
+    const id=el.getAttribute('data-yt');
+    const label=el.getAttribute('aria-label')||'';
+    el.dataset.loaded='';
+    el.classList.remove('loaded');
+    el.style.cursor='pointer';
+    el.setAttribute('onclick','loadYT(this)');
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.innerHTML=''+
+      '<div class="demo-thumb" style="background-image:url(\'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg\')"></div>'+
+      '<div class="demo-play" aria-hidden="true"><svg width="68" height="48" viewBox="0 0 68 48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.3 0 34 0 34 0S12.7 0 7.5 1.6a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.7 48 34 48 34 48s21.3 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#c00"/><path d="M27 34.5 45 24 27 13.5z" fill="#fff"/></svg></div>';
+  }
+  function loadYT(el){
+    const id=el.getAttribute('data-yt');
+    if(!id||el.dataset.loaded)return;
+    // zatrzymaj inne grające filmy — przywróć im miniatury
+    document.querySelectorAll('.demo-frame[data-yt]').forEach(other=>{
+      if(other!==el && other.dataset.loaded) resetYT(other);
+    });
+    el.dataset.loaded='1';
+    el.classList.add('loaded');
+    // odtwarzacz w pełni klikalny — usuń przechwytywanie kliknięć z kontenera
+    el.removeAttribute('onclick');
+    el.style.cursor='default';
+    el.innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0" title="Film" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+  }
+  document.querySelectorAll('.demo-frame[data-yt]').forEach(f=>{
+    f.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!f.dataset.loaded){e.preventDefault();loadYT(f);}});
+  });
+  // zatrzymaj wszystkie grające filmy gdy użytkownik odchodzi ze strony (inna karta, YouTube, minimalizacja)
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      document.querySelectorAll('.demo-frame[data-yt]').forEach(f=>{ if(f.dataset.loaded) resetYT(f); });
+    }
+  });
+  // LIGHTBOX — podgląd zdjęć na pełnym ekranie ze strzałkami
+  (function(){
+    const items=[...document.querySelectorAll('.gal-item[data-full]')];
+    const lb=document.getElementById('lightbox');
+    if(!lb||!items.length)return;
+    const img=lb.querySelector('.lb-img');
+    const counter=lb.querySelector('.lb-counter');
+    let idx=0;
+    const srcs=items.map(el=>el.getAttribute('data-full'));
+    function show(i){
+      idx=(i+srcs.length)%srcs.length;
+      img.src=srcs[idx];
+      counter.textContent=(idx+1)+' / '+srcs.length;
+    }
+    function open(i){show(i);lb.classList.add('open');lb.setAttribute('aria-hidden','false');}
+    function close(){lb.classList.remove('open');lb.setAttribute('aria-hidden','true');img.src='';}
+    items.forEach((el,i)=>{el.addEventListener('click',()=>open(i));
+      el.style.cursor='zoom-in';});
+    lb.querySelector('.lb-close').addEventListener('click',close);
+    lb.querySelector('.lb-prev').addEventListener('click',e=>{e.stopPropagation();show(idx-1);});
+    lb.querySelector('.lb-next').addEventListener('click',e=>{e.stopPropagation();show(idx+1);});
+    lb.addEventListener('click',e=>{if(e.target===lb)close();});
+    document.addEventListener('keydown',e=>{
+      if(!lb.classList.contains('open'))return;
+      if(e.key==='Escape')close();
+      else if(e.key==='ArrowLeft')show(idx-1);
+      else if(e.key==='ArrowRight')show(idx+1);
+    });
+  })();
+</script>
+<script src="role.js"></script>
+</body>
+</html>
