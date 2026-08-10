@@ -523,6 +523,12 @@
   document.querySelectorAll('.demo-frame[data-yt]').forEach(f=>{
     f.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!f.dataset.loaded){e.preventDefault();loadYT(f);}});
   });
+  // zatrzymaj wszystkie grające filmy gdy użytkownik odchodzi ze strony (inna karta, YouTube, minimalizacja)
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      document.querySelectorAll('.demo-frame[data-yt]').forEach(f=>{ if(f.dataset.loaded) resetYT(f); });
+    }
+  });
   // LIGHTBOX — podgląd zdjęć na pełnym ekranie ze strzałkami
   (function(){
     const items=[...document.querySelectorAll('.gal-item[data-full]')];
