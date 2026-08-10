@@ -184,6 +184,9 @@
   .demo-thumb{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s ease}
   .demo-frame:hover .demo-thumb{transform:scale(1.04)}
   .demo-frame::before{content:'';position:absolute;inset:0;background:rgba(14,13,11,.25);transition:background .3s;z-index:1}
+  .demo-frame.loaded::before{display:none}
+  .demo-frame.loaded iframe{z-index:3}
+  .demo-frame.loaded .demo-thumb,.demo-frame.loaded .demo-play{display:none}
   .demo-frame:hover::before{background:rgba(14,13,11,.1)}
   .demo-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;
     opacity:.9;transition:opacity .3s,transform .3s}
@@ -494,6 +497,7 @@
     const id=el.getAttribute('data-yt');
     const label=el.getAttribute('aria-label')||'';
     el.dataset.loaded='';
+    el.classList.remove('loaded');
     el.style.cursor='pointer';
     el.setAttribute('onclick','loadYT(this)');
     el.setAttribute('role','button');
@@ -510,6 +514,7 @@
       if(other!==el && other.dataset.loaded) resetYT(other);
     });
     el.dataset.loaded='1';
+    el.classList.add('loaded');
     // odtwarzacz w pełni klikalny — usuń przechwytywanie kliknięć z kontenera
     el.removeAttribute('onclick');
     el.style.cursor='default';
