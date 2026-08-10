@@ -72,31 +72,15 @@
     position:absolute;inset:0;
     background-size:cover;background-position:center;
     opacity:0;
-    animation:kbFade 32s infinite;
-    will-change:transform,opacity;
+    transition:opacity 2s ease-in-out;
+    will-change:opacity;
   }
-  .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform}
-  /* Placeholder gradients — PODMIEŃ na własne zdjęcia: background-image:url('foto1.jpg') */
-  .kb-slide:nth-child(1){animation-delay:0s}
-  .kb-slide:nth-child(1) .kb-img{background:url('foto1.jpg') center top/cover;animation:kbZoom1 32s infinite}
-  .kb-slide:nth-child(2){animation-delay:8s}
-  .kb-slide:nth-child(2) .kb-img{background:url('foto2.jpg') center top/cover;animation:kbZoom2 32s infinite;animation-delay:8s}
-  .kb-slide:nth-child(3){animation-delay:16s}
-  .kb-slide:nth-child(3) .kb-img{background:url('foto3.jpg') center top/cover;animation:kbZoom3 32s infinite;animation-delay:16s}
-  .kb-slide:nth-child(4){animation-delay:24s}
-  .kb-slide:nth-child(4) .kb-img{background:url('foto4.jpg') center top/cover;animation:kbZoom4 32s infinite;animation-delay:24s}
-
-  @keyframes kbFade{
-    0%{opacity:0}
-    3%{opacity:1}
-    22%{opacity:1}
-    27%{opacity:0}
-    100%{opacity:0}
-  }
-  @keyframes kbZoom1{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.15) translate(-2%,-2%)}}
-  @keyframes kbZoom2{0%{transform:scale(1.13) translate(2%,1%)}100%{transform:scale(1) translate(0,0)}}
-  @keyframes kbZoom3{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.16) translate(2%,-2%)}}
-  @keyframes kbZoom4{0%{transform:scale(1.12) translate(-2%,1%)}100%{transform:scale(1) translate(0,0)}}
+  .kb-slide.active{opacity:1}
+  .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top;will-change:transform}
+  .kb-slide:nth-child(1) .kb-img{background:url('foto1.jpg') center top/cover}
+  .kb-slide:nth-child(2) .kb-img{background:url('foto2.jpg') center top/cover}
+  .kb-slide:nth-child(3) .kb-img{background:url('foto3.jpg') center top/cover}
+  .kb-slide:nth-child(4) .kb-img{background:url('foto4.jpg') center top/cover}
 
   .hero-scrim{position:absolute;inset:0;z-index:1;
     background:radial-gradient(120px 90px at top left,rgba(14,13,11,.92),transparent 75%),
@@ -258,11 +242,6 @@
   /* ---------- RESPONSIVE ---------- */
   @media(max-width:820px){
     .kb-slide .kb-img{background-position:55% top!important}
-    /* na telefonie: 4 zdjęcia płynnie przenikają (kbFade zostaje na .kb-slide),
-       ale bez zoomu — to on powodował skakanie. Obraz statyczny, samo przenikanie. */
-    .kb-slide:nth-child(1) .kb-img,.kb-slide:nth-child(2) .kb-img,
-    .kb-slide:nth-child(3) .kb-img,.kb-slide:nth-child(4) .kb-img{
-      animation:none!important;transform:none!important}
     .about-grid{grid-template-columns:1fr}
     .cred-cols{grid-template-columns:1fr;gap:44px}
     .niche-grid{grid-template-columns:1fr;gap:34px}
@@ -496,6 +475,20 @@
   // nav solidify
   const nav=document.getElementById('nav');
   addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  // HERO — przełączanie zdjęć sterowane JS (niezawodne na PC i telefonie,
+  // bez kruchych animation-delay, które rozjeżdżały się na mobile)
+  (function(){
+    const slides=document.querySelectorAll('.kb-slide');
+    if(!slides.length)return;
+    let idx=0;
+    slides[0].classList.add('active');
+    if(slides.length<2)return;
+    setInterval(()=>{
+      slides[idx].classList.remove('active');
+      idx=(idx+1)%slides.length;
+      slides[idx].classList.add('active');
+    },6000); // co 6 sekund zmiana zdjęcia (2s przenikanie + ~4s pauza)
+  })();
   // reveal — odporne na wysokie sekcje (np. galeria na telefonie) i szybki scroll
   const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -8% 0px'});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
