@@ -222,8 +222,9 @@
 
   /* LIGHTBOX */
   .lb{position:fixed;inset:0;z-index:100;background:rgba(8,7,6,.95);
-    display:none;align-items:center;justify-content:center;padding:40px}
-  .lb.open{display:flex}
+    display:none;align-items:center;justify-content:center;padding:40px;
+    width:0;height:0;overflow:hidden}
+  .lb.open{display:flex;width:100%;height:100%;overflow:visible}
   .lb-img{max-width:90vw;max-height:88vh;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.6)}
   .lb-close,.lb-prev,.lb-next{position:absolute;background:none;border:none;color:var(--cream);
     cursor:pointer;transition:color .2s;user-select:none}
