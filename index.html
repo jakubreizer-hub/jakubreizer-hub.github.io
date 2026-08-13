@@ -481,6 +481,10 @@
 </div>
 
 <script>
+  // Po odświeżeniu nie przywracaj pozycji przewijania — każde wejście zaczyna od góry,
+  // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
+  // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
+  if('scrollRestoration' in history){history.scrollRestoration='manual';}
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
@@ -510,6 +514,10 @@
     });
   }
   addEventListener('scroll',revealVisible,{passive:true});
+  // odsłoń od razu to, co widoczne po (prze)ładowaniu i przy powrocie z bfcache (pageshow)
+  addEventListener('load',revealVisible);
+  addEventListener('pageshow',revealVisible);
+  revealVisible();
   // bezpiecznik okresowy: gwarantuje odsłonięcie tego, co jest w polu widzenia,
   // nawet gdyby observer i scroll zawiodły (np. na niektórych telefonach)
   let revChecks=0;
@@ -517,6 +525,9 @@
     revealVisible();
     if(++revChecks>40 || !document.querySelector('.reveal:not(.in)')) clearInterval(revTimer);
   },250);
+  // twardy bezpiecznik: po 1,2 s odsłoń absolutnie wszystko, żeby żadna sekcja
+  // nie mogła zostać niewidoczna (czarna) dłużej niż moment — niezależnie od urządzenia
+  setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{el.classList.add('in');io.unobserve(el);}),1200);
   // close mobile menu on link click
   document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
