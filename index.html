@@ -39,9 +39,10 @@
     font-weight:300;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
-    /* clip zamiast hidden: chowa poziome wystawanie, ale NIE robi z body kontenera
-       przewijania — to naprawia gubienie malowania (czarne pola) na wysokiej stronie na telefonie */
-    overflow-x:clip;
+    /* Celowo BEZ overflow-x na body. Strona nie wystaje w poziomie, a overflow na body
+       zmuszał Safari (iOS) do trzymania całej wysokiej strony jako jednej warstwy powyżej
+       limitu malowania — przez co dół wychodził czarny do czasu repaintu. Bez tego iOS
+       kafelkuje stronę normalnie i maluje każdą sekcję na bieżąco. */
   }
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--brass);color:var(--ink)}
@@ -487,6 +488,11 @@
   // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
   // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
+  // iOS Safari: delikatne wymuszenie repaintu po załadowaniu i przy powrocie na stronę
+  // (to samo, co robi wygaszenie/włączenie ekranu) — dosuwa malowanie, gdyby coś zostało czarne.
+  function nudgeRepaint(){ const y=window.scrollY||0; window.scrollTo(0,y+1); window.scrollTo(0,y); }
+  addEventListener('load',()=>{ requestAnimationFrame(nudgeRepaint); });
+  addEventListener('pageshow',()=>{ requestAnimationFrame(nudgeRepaint); });
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
