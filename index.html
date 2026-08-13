@@ -73,10 +73,11 @@
     background-size:cover;background-position:center;
     opacity:0;
     transition:opacity 2s ease-in-out;
-    will-change:opacity;
   }
-  .kb-slide.active{opacity:1}
-  .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top;will-change:transform}
+  /* will-change tylko na aktywnym slajdzie — unikamy stałego promowania 8 pełnoekranowych warstw GPU,
+     co na telefonie potrafiło powodować chwilowe czarne (niedomalowane) obszary znikające po repaincie */
+  .kb-slide.active{opacity:1;will-change:opacity}
+  .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top}
   .kb-slide:nth-child(1) .kb-img{background:url('Jakub-Reizer-Aktor_1.jpg') center top/cover}
   .kb-slide:nth-child(2) .kb-img{background:url('Jakub-Reizer-Aktor_2.jpg') center top/cover}
   .kb-slide:nth-child(3) .kb-img{background:url('Jakub-Reizer-Aktor_3.jpg') center top/cover}
