@@ -515,7 +515,10 @@
         }
       });
       below.sort(function(a,b){return b.b-a.b;});
-      var txt='innerH:'+window.innerHeight+'  scrollH:'+H+'\n'+
+      var vvH = window.visualViewport ? Math.round(window.visualViewport.height) : 0;
+      var maxScroll = Math.round(H - window.innerHeight);
+      var txt='innerH:'+window.innerHeight+'  vvH:'+vvH+'  scrollH:'+H+'\n'+
+              'scrollY:'+Math.round(window.scrollY)+'  maxScroll:'+maxScroll+'\n'+
               'stopka dół:'+fb+'  NADMIAR:'+(H-fb)+'px\n'+
               'elementów pod stopką: '+below.length+'\n';
       below.slice(0,5).forEach(function(o){
@@ -533,6 +536,26 @@
   // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
   // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
+  // ====== NAPRAWA luki pod stopką w Chrome na iOS ======
+  // Gdy chowa się pasek przeglądarki, okno rośnie, ale Chrome iOS nie dosuwa strony do końca
+  // treści — zostaje pusty (ciemny) obszar pod stopką. Przy każdej zmianie wielkości okna
+  // sprawdzamy, czy jesteśmy przewinięci poniżej realnego końca, i jeśli tak — dosuwamy z powrotem.
+  (function(){
+    function clampToEnd(){
+      var max = Math.max(0, (document.scrollingElement||document.documentElement).scrollHeight - window.innerHeight);
+      if(window.scrollY > max + 1){ window.scrollTo(0, max); }
+    }
+    addEventListener('resize', clampToEnd, {passive:true});
+    addEventListener('orientationchange', function(){ setTimeout(clampToEnd,250); });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', clampToEnd);
+      window.visualViewport.addEventListener('scroll', clampToEnd);
+    }
+    // dodatkowo tuż po zatrzymaniu przewijania (na wypadek, gdy resize nie zdąży się odpalić)
+    var st;
+    addEventListener('scroll', function(){ clearTimeout(st); st=setTimeout(clampToEnd,120); }, {passive:true});
+  })();
+  // ====== koniec naprawy luki ======
   // iOS Safari: delikatne wymuszenie repaintu po załadowaniu i przy powrocie na stronę
   // (to samo, co robi wygaszenie/włączenie ekranu) — dosuwa malowanie, gdyby coś zostało czarne.
   function nudgeRepaint(){ const y=window.scrollY||0; window.scrollTo(0,y+1); window.scrollTo(0,y); }
