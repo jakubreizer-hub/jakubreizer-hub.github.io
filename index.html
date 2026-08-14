@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0e0d0b">
+<meta name="color-scheme" content="dark">
 <title>Jakub Reizer - Aktor | Kraków · Warszawa</title>
 <meta name="description" content="Jakub Reizer - aktor teatralny, filmowy i telewizyjny z ponad 10-letnim doświadczeniem. Teatr, film, telewizja, a od niedawna motion capture tworzone z pomocą AI. Kraków · Warszawa.">
 <meta property="og:site_name" content="Jakub Reizer">
@@ -35,11 +36,12 @@
      To eliminuje błąd Chrome na iOS: strona nie może „wyjechać" poza swój obszar, więc
      przeglądarka nie pokazuje pustego (czarnego) tła pod stopką. Body nie przewija się —
      przewija się #viewport-scroll o wysokości równej oknu. */
-  html{background:var(--ink);height:100%}
+  html{background:var(--ink);height:100%;color-scheme:dark}
   #viewport-scroll{
     height:100%;
-    overflow-y:scroll;overflow-x:hidden;   /* scroll (nie auto) — wymusza pokazywanie paska przewijania */
+    overflow-y:auto;overflow-x:hidden;
     scroll-behavior:smooth;
+    color-scheme:dark;   /* deklaruje stronę jako ciemną → natywny pasek jest JASNY (widoczny) w każdym trybie */
   }
   body{
     background:var(--ink);
