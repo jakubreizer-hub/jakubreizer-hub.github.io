@@ -38,8 +38,7 @@
   html{background:var(--ink);height:100%}
   #viewport-scroll{
     height:100%;
-    overflow-y:auto;overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;   /* miękki, sprężysty scroll (odbijanie na krawędziach) */
+    overflow-y:scroll;overflow-x:hidden;   /* scroll (nie auto) — wymusza pokazywanie paska przewijania */
     scroll-behavior:smooth;
   }
   body{
