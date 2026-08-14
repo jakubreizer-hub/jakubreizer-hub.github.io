@@ -31,7 +31,17 @@
     --body:'Inter',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  /* ===== Przewijanie w kontenerze o stałej wysokości okna =====
+     To eliminuje błąd Chrome na iOS: strona nie może „wyjechać" poza swój obszar, więc
+     przeglądarka nie pokazuje pustego (czarnego) tła pod stopką. Body nie przewija się —
+     przewija się #viewport-scroll o wysokości równej oknu. */
+  html{background:var(--ink);height:100%}
+  #viewport-scroll{
+    height:100%;
+    overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;   /* miękki, sprężysty scroll (odbijanie na krawędziach) */
+    scroll-behavior:smooth;
+  }
   body{
     background:var(--ink);
     color:var(--cream);
@@ -39,10 +49,8 @@
     font-weight:300;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
-    /* Celowo BEZ overflow-x na body. Strona nie wystaje w poziomie, a overflow na body
-       zmuszał Safari (iOS) do trzymania całej wysokiej strony jako jednej warstwy powyżej
-       limitu malowania — przez co dół wychodził czarny do czasu repaintu. Bez tego iOS
-       kafelkuje stronę normalnie i maluje każdą sekcję na bieżąco. */
+    height:100%;
+    overflow:hidden;        /* body się nie przewija — robi to #viewport-scroll */
   }
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--brass);color:var(--ink)}
@@ -69,7 +77,7 @@
   .nav-toggle{display:none;background:none;border:none;color:var(--cream);cursor:pointer;font-size:1.4rem}
 
   /* ---------- HERO / KEN BURNS ---------- */
-  .hero{position:relative;height:100svh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+  .hero{position:relative;height:100%;min-height:600px;overflow:hidden;display:flex;align-items:center}
   .kb-stage{position:absolute;inset:0;z-index:0}
   .kb-slide{
     position:absolute;inset:0;
@@ -125,15 +133,8 @@
 
   /* ---------- SECTIONS ---------- */
   section{padding:clamp(48px,7vh,80px) clamp(20px,5vw,64px);position:relative;background:#171513}
-  /* iOS Safari: renderuj każdą sekcję niezależnie. Bez tego Safari na iPhonie budował
-     jedną wielką warstwę malowania (ponad limit iOS) i dół strony wychodził czarny do
-     czasu repaintu (scroll / wygaszenie ekranu). content-visibility maluje sekcję dopiero,
-     gdy wjeżdża w ekran, więc problem znika. contain-intrinsic-size stabilizuje pasek scrolla. */
-  .demo,.gallery,.about,.credits,.niche,.contact,footer{
-    content-visibility:auto;
-    contain-intrinsic-size:900px;        /* fallback dla starszych przeglądarek */
-    contain-intrinsic-size:auto 900px;   /* nowsze: zapamiętuje realną wysokość po pierwszym renderze */
-  }
+  /* (Usunięto content-visibility — jego szacunki wysokości sekcji powodowały w Chrome na iOS
+     „kurczenie się" strony przy przewijaniu i puste, czarne miejsce pod stopką.) */
   .hero + section::before,section + section::before{content:'';position:absolute;top:0;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);
     height:1px;background:var(--brass);opacity:.3}
   .sec-label{font-size:.9rem;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
@@ -300,6 +301,8 @@
     <a href="#contact">Kontakt</a>
   </div>
 </nav>
+
+<div id="viewport-scroll">
 
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
@@ -483,6 +486,8 @@
 
 <footer>© <span id="yr"></span> Jakub Reizer · Aktor</footer>
 
+</div><!-- /#viewport-scroll -->
+
 <!-- LIGHTBOX -->
 <div id="lightbox" class="lb" aria-hidden="true">
   <button class="lb-close" aria-label="Zamknij">&times;</button>
@@ -493,20 +498,63 @@
 </div>
 
 <script>
+  // ====== PANEL DIAGNOSTYCZNY — widoczny tylko po wejściu na adres z /#debug ======
+  // Zwykli odwiedzający go nie widzą. Ty wchodzisz na jakubreizer.pl/#debug, zjeżdżasz na dół,
+  // robisz zrzut — panel pokazuje, który element tworzy puste miejsce pod stopką.
+  if(location.hash.indexOf('debug')>=0){
+    var dbg=document.createElement('div');
+    dbg.style.cssText='position:fixed;left:6px;top:6px;z-index:99999;max-width:94vw;'+
+      'background:rgba(255,235,0,.95);color:#000;font:12px/1.4 monospace;padding:8px 10px;'+
+      'border:2px solid #000;border-radius:6px;white-space:pre-wrap;pointer-events:none';
+    dbg.textContent='diagnostyka…';
+    addEventListener('DOMContentLoaded',function(){document.body.appendChild(dbg);});
+    function dbgScan(){
+      if(!dbg.parentNode && document.body) document.body.appendChild(dbg);
+      var sc=document.getElementById('viewport-scroll');
+      if(!sc){ dbg.textContent='brak #viewport-scroll'; return; }
+      var scTop=sc.getBoundingClientRect().top;
+      var footer=document.querySelector('footer');
+      var fb= footer ? Math.round(footer.getBoundingClientRect().bottom - scTop + sc.scrollTop) : 0;
+      var H= sc.scrollHeight;
+      var below=[];
+      sc.querySelectorAll('*').forEach(function(el){
+        if(el===dbg) return;
+        var cs=getComputedStyle(el);
+        var b=Math.round(el.getBoundingClientRect().bottom - scTop + sc.scrollTop);
+        if(b> fb+2 && el.getBoundingClientRect().height>2){
+          below.push({t:el.tagName,c:(el.className||'').toString().slice(0,22),i:el.id,b:b,
+            h:Math.round(el.getBoundingClientRect().height),p:cs.position,d:cs.display});
+        }
+      });
+      below.sort(function(a,b){return b.b-a.b;});
+      var vvH = window.visualViewport ? Math.round(window.visualViewport.height) : 0;
+      var maxScroll = Math.round(H - sc.clientHeight);
+      var txt='clientH:'+sc.clientHeight+'  innerH:'+window.innerHeight+'  vvH:'+vvH+'\n'+
+              'scrollTop:'+Math.round(sc.scrollTop)+'  maxScroll:'+maxScroll+'  scrollH:'+H+'\n'+
+              'stopka dół:'+fb+'  NADMIAR:'+(H-fb)+'px\n'+
+              'elementów pod stopką: '+below.length+'\n';
+      below.slice(0,5).forEach(function(o){
+        txt+='• '+o.t+(o.i?'#'+o.i:'')+(o.c?'.'+o.c:'')+' | dół:'+o.b+' h:'+o.h+' '+o.p+'/'+o.d+'\n';
+      });
+      if(!below.length) txt+='(nic nie wystaje pod stopką)';
+      dbg.textContent=txt;
+    }
+    addEventListener('load',function(){dbgScan();setTimeout(dbgScan,800);setTimeout(dbgScan,2500);});
+    addEventListener('DOMContentLoaded',function(){var s=document.getElementById('viewport-scroll'); if(s) s.addEventListener('scroll',dbgScan,{passive:true});});
+  }
+  // ====== koniec panelu diagnostycznego ======
+
   // Po odświeżeniu nie przywracaj pozycji przewijania — każde wejście zaczyna od góry,
   // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
   // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
-  // iOS Safari: delikatne wymuszenie repaintu po załadowaniu i przy powrocie na stronę
-  // (to samo, co robi wygaszenie/włączenie ekranu) — dosuwa malowanie, gdyby coś zostało czarne.
-  function nudgeRepaint(){ const y=window.scrollY||0; window.scrollTo(0,y+1); window.scrollTo(0,y); }
-  addEventListener('load',()=>{ requestAnimationFrame(nudgeRepaint); });
-  addEventListener('pageshow',()=>{ requestAnimationFrame(nudgeRepaint); });
+  // Kontener przewijania (przewija się on, nie okno) — to eliminuje lukę Chrome iOS pod stopką.
+  var SC=document.getElementById('viewport-scroll');
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
   const nav=document.getElementById('nav');
-  addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  SC.addEventListener('scroll',()=>nav.classList.toggle('solid',SC.scrollTop>60),{passive:true});
   // HERO — przełączanie zdjęć sterowane JS (niezawodne na PC i telefonie,
   // bez kruchych animation-delay, które rozjeżdżały się na mobile)
   (function(){
@@ -540,7 +588,7 @@
       if(r.top < window.innerHeight*0.94 && r.bottom > 0){el.classList.add('in');io.unobserve(el);}
     });
   }
-  addEventListener('scroll',revealVisible,{passive:true});
+  SC.addEventListener('scroll',revealVisible,{passive:true});
   // odsłoń od razu to, co widoczne po (prze)ładowaniu i przy powrocie z bfcache (pageshow)
   addEventListener('load',revealVisible);
   addEventListener('pageshow',revealVisible);
@@ -555,8 +603,18 @@
   // twardy bezpiecznik: po 1,2 s odsłoń absolutnie wszystko, żeby żadna sekcja
   // nie mogła zostać niewidoczna (czarna) dłużej niż moment — niezależnie od urządzenia
   setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{el.classList.add('in');io.unobserve(el);}),1200);
-  // close mobile menu on link click
-  document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
+  // Kotwice (#demo, #galeria, …) — przewijają KONTENER (nie okno), więc obsługujemy je jawnie.
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var id=a.getAttribute('href').slice(1);
+      if(!id){ return; }
+      var t=document.getElementById(id);
+      if(!t){ return; }
+      e.preventDefault();
+      t.scrollIntoView({behavior:'smooth',block:'start'});
+      var nl=document.getElementById('navlinks'); if(nl) nl.classList.remove('open');
+    });
+  });
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
   function resetYT(el){
     const id=el.getAttribute('data-yt');
