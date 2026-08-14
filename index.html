@@ -90,9 +90,8 @@
     background-size:cover;background-position:center;
     opacity:0;
     transition:opacity 2s ease-in-out;
+    will-change:opacity;   /* każde zdjęcie na własnej warstwie GPU → czyste, gładkie przenikanie */
   }
-  /* bez will-change — nie promujemy na stałe pełnoekranowych warstw GPU,
-     co na telefonie potrafiło powodować chwilowe czarne (niedomalowane) obszary */
   .kb-slide.active{opacity:1}
   .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top}
   .kb-slide:nth-child(1) .kb-img{background:url('Jakub-Reizer-Aktor_1.jpg') center top/cover}
@@ -314,7 +313,7 @@
 <header class="hero" id="top">
   <div class="kb-stage">
     <!-- PODMIEŃ placeholdery: w .kb-img wstaw background-image:url('twoje-zdjecie.jpg') -->
-    <div class="kb-slide"><div class="kb-img"></div></div>
+    <div class="kb-slide active"><div class="kb-img"></div></div>   <!-- pierwsze zdjęcie widoczne od razu, bez wjazdu z czerni -->
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
