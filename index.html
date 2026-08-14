@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0e0d0b">
+<meta name="color-scheme" content="dark">
 <title>Jakub Reizer - Aktor | Kraków · Warszawa</title>
 <meta name="description" content="Jakub Reizer - aktor teatralny, filmowy i telewizyjny z ponad 10-letnim doświadczeniem. Teatr, film, telewizja, a od niedawna motion capture tworzone z pomocą AI. Kraków · Warszawa.">
 <meta property="og:site_name" content="Jakub Reizer">
@@ -31,9 +32,20 @@
     --body:'Inter',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth;background:var(--ink);overscroll-behavior-y:none;scrollbar-width:none}
-  html::-webkit-scrollbar{width:0;height:0;display:none}
-  /* własny pasek przewijania (brązowy), widoczny tak samo w każdej przeglądarce */
+  /* ===== Przewijanie w kontenerze o stałej wysokości okna =====
+     To eliminuje błąd Chrome na iOS: strona nie może „wyjechać" poza swój obszar, więc
+     przeglądarka nie pokazuje pustego (czarnego) tła pod stopką. Body nie przewija się —
+     przewija się #viewport-scroll o wysokości równej oknu. */
+  html{background:var(--ink);height:100%;color-scheme:dark}
+  #viewport-scroll{
+    height:100%;
+    overflow-y:auto;overflow-x:hidden;
+    scroll-behavior:smooth;
+    color-scheme:dark;
+    scrollbar-width:none;               /* chowamy natywny pasek (iOS koloruje go niekonsekwentnie) */
+  }
+  #viewport-scroll::-webkit-scrollbar{width:0;height:0;display:none}
+  /* Własny pasek — kolor ustawiam JA, więc jest identyczny w każdym trybie i przeglądarce */
   #sbar{position:fixed;top:0;right:0;width:10px;height:100%;z-index:45;pointer-events:none}
   #sthumb{position:absolute;top:0;right:3px;width:4px;border-radius:4px;background:var(--brass);opacity:.2}
   body{
@@ -43,7 +55,8 @@
     font-weight:300;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+    height:100%;
+    overflow:hidden;        /* body się nie przewija — robi to #viewport-scroll */
   }
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--brass);color:var(--ink)}
@@ -70,14 +83,14 @@
   .nav-toggle{display:none;background:none;border:none;color:var(--cream);cursor:pointer;font-size:1.4rem}
 
   /* ---------- HERO / KEN BURNS ---------- */
-  .hero{position:relative;height:100svh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+  .hero{position:relative;height:100%;min-height:600px;overflow:hidden;display:flex;align-items:center}
   .kb-stage{position:absolute;inset:0;z-index:0}
   .kb-slide{
     position:absolute;inset:0;
     background-size:cover;background-position:center;
     opacity:0;
     transition:opacity 2s ease-in-out;
-    will-change:opacity;
+    will-change:opacity;   /* każde zdjęcie na własnej warstwie GPU → czyste, gładkie przenikanie */
   }
   .kb-slide.active{opacity:1}
   .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top;will-change:transform}
@@ -125,6 +138,8 @@
 
   /* ---------- SECTIONS ---------- */
   section{padding:clamp(48px,7vh,80px) clamp(20px,5vw,64px);position:relative;background:#171513}
+  /* (Usunięto content-visibility — jego szacunki wysokości sekcji powodowały w Chrome na iOS
+     „kurczenie się" strony przy przewijaniu i puste, czarne miejsce pod stopką.) */
   .hero + section::before,section + section::before{content:'';position:absolute;top:0;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);
     height:1px;background:var(--brass);opacity:.3}
   .sec-label{font-size:.9rem;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
@@ -292,11 +307,13 @@
   </div>
 </nav>
 
+<div id="viewport-scroll">
+
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <div class="kb-stage">
     <!-- PODMIEŃ placeholdery: w .kb-img wstaw background-image:url('twoje-zdjecie.jpg') -->
-    <div class="kb-slide active"><div class="kb-img"></div></div>
+    <div class="kb-slide active"><div class="kb-img"></div></div>   <!-- pierwsze zdjęcie widoczne od razu, bez wjazdu z czerni -->
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
@@ -474,6 +491,8 @@
 
 <footer>© <span id="yr"></span> Jakub Reizer · Aktor</footer>
 
+</div><!-- /#viewport-scroll -->
+
 <!-- LIGHTBOX -->
 <div id="lightbox" class="lb" aria-hidden="true">
   <button class="lb-close" aria-label="Zamknij">&times;</button>
@@ -484,31 +503,37 @@
 </div>
 
 <script>
-  // Własny pasek przewijania — kolor stały (brązowy), spójny w każdym trybie/przeglądarce.
+  // Po odświeżeniu nie przywracaj pozycji przewijania — każde wejście zaczyna od góry,
+  // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
+  // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
+  if('scrollRestoration' in history){history.scrollRestoration='manual';}
+  // Kontener przewijania (przewija się on, nie okno) — to eliminuje lukę Chrome iOS pod stopką.
+  var SC=document.getElementById('viewport-scroll');
+  // Własny pasek przewijania — kolor stały (brązowy), niezależny od trybu i przeglądarki.
   (function(){
-    var bar=document.createElement('div');bar.id='sbar';
-    var thumb=document.createElement('div');thumb.id='sthumb';
-    bar.appendChild(thumb);
-    function add(){ if(document.body && !bar.parentNode) document.body.appendChild(bar); }
-    function upd(){ add();
-      var de=document.documentElement;
-      var ch=de.clientHeight, sh=de.scrollHeight, st=window.scrollY||de.scrollTop||0;
+    if(!SC) return;
+    var bar=document.createElement('div'); bar.id='sbar';
+    var thumb=document.createElement('div'); thumb.id='sthumb';
+    bar.appendChild(thumb); document.body.appendChild(bar);
+    function upd(){
+      var ch=SC.clientHeight, sh=SC.scrollHeight, st=SC.scrollTop;
       if(sh<=ch+1){ bar.style.display='none'; return; }
       bar.style.display='block';
       var th=Math.max(30, ch*ch/sh);
       var top=(ch-th)*(st/(sh-ch));
-      thumb.style.height=th+'px'; thumb.style.transform='translateY('+top+'px)';
+      thumb.style.height=th+'px';
+      thumb.style.transform='translateY('+top+'px)';
     }
-    addEventListener('DOMContentLoaded',upd);
-    addEventListener('scroll',upd,{passive:true});
-    addEventListener('resize',upd); addEventListener('load',upd); upd();
+    SC.addEventListener('scroll',upd,{passive:true});
+    addEventListener('resize',upd);
+    addEventListener('load',upd);
+    upd();
   })();
-
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
   const nav=document.getElementById('nav');
-  addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  SC.addEventListener('scroll',()=>nav.classList.toggle('solid',SC.scrollTop>60),{passive:true});
   // HERO — przełączanie zdjęć sterowane JS (niezawodne na PC i telefonie,
   // bez kruchych animation-delay, które rozjeżdżały się na mobile)
   (function(){
@@ -517,11 +542,18 @@
     let idx=0;
     slides[0].classList.add('active');
     if(slides.length<2)return;
-    setInterval(()=>{
+    let timer=null;
+    function step(){                       // klasyczne przenikanie — dokładnie jak w oryginale
       slides[idx].classList.remove('active');
       idx=(idx+1)%slides.length;
       slides[idx].classList.add('active');
-    },5000); // co 5 s (2s przenikania)
+    }
+    function start(){ if(!timer) timer=setInterval(step,5000); } // co 5 s (2s przenikania)
+    function stop(){ if(timer){clearInterval(timer);timer=null;} }
+    // Pokaz leci CAŁY CZAS, niezależnie od pozycji na stronie.
+    start();
+    // Pauza tylko gdy karta jest w tle (oszczędność baterii — i tak nic wtedy nie widać).
+    document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
   })();
   // reveal — odporne na wysokie sekcje (np. galeria na telefonie) i szybki scroll
   const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -8% 0px'});
@@ -532,7 +564,11 @@
       if(r.top < window.innerHeight*0.94 && r.bottom > 0){el.classList.add('in');io.unobserve(el);}
     });
   }
-  addEventListener('scroll',revealVisible,{passive:true});
+  SC.addEventListener('scroll',revealVisible,{passive:true});
+  // odsłoń od razu to, co widoczne po (prze)ładowaniu i przy powrocie z bfcache (pageshow)
+  addEventListener('load',revealVisible);
+  addEventListener('pageshow',revealVisible);
+  revealVisible();
   // bezpiecznik okresowy: gwarantuje odsłonięcie tego, co jest w polu widzenia,
   // nawet gdyby observer i scroll zawiodły (np. na niektórych telefonach)
   let revChecks=0;
@@ -540,8 +576,21 @@
     revealVisible();
     if(++revChecks>40 || !document.querySelector('.reveal:not(.in)')) clearInterval(revTimer);
   },250);
-  // close mobile menu on link click
-  document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
+  // twardy bezpiecznik: po 1,2 s odsłoń absolutnie wszystko, żeby żadna sekcja
+  // nie mogła zostać niewidoczna (czarna) dłużej niż moment — niezależnie od urządzenia
+  setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{el.classList.add('in');io.unobserve(el);}),1200);
+  // Kotwice (#demo, #galeria, …) — przewijają KONTENER (nie okno), więc obsługujemy je jawnie.
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var id=a.getAttribute('href').slice(1);
+      if(!id){ return; }
+      var t=document.getElementById(id);
+      if(!t){ return; }
+      e.preventDefault();
+      t.scrollIntoView({behavior:'smooth',block:'start'});
+      var nl=document.getElementById('navlinks'); if(nl) nl.classList.remove('open');
+    });
+  });
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
   function resetYT(el){
     const id=el.getAttribute('data-yt');
