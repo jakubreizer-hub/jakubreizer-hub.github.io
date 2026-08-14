@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0e0d0b">
+<meta name="color-scheme" content="dark">
 <title>Jakub Reizer - Aktor | Kraków · Warszawa</title>
 <meta name="description" content="Jakub Reizer - aktor teatralny, filmowy i telewizyjny z ponad 10-letnim doświadczeniem. Teatr, film, telewizja, a od niedawna motion capture tworzone z pomocą AI. Kraków · Warszawa.">
 <meta property="og:site_name" content="Jakub Reizer">
@@ -31,7 +32,22 @@
     --body:'Inter',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  /* ===== Przewijanie w kontenerze o stałej wysokości okna =====
+     To eliminuje błąd Chrome na iOS: strona nie może „wyjechać" poza swój obszar, więc
+     przeglądarka nie pokazuje pustego (czarnego) tła pod stopką. Body nie przewija się —
+     przewija się #viewport-scroll o wysokości równej oknu. */
+  html{background:var(--ink);height:100%;color-scheme:dark}
+  #viewport-scroll{
+    height:100%;
+    overflow-y:auto;overflow-x:hidden;
+    scroll-behavior:smooth;
+    color-scheme:dark;
+    scrollbar-width:none;               /* chowamy natywny pasek (iOS koloruje go niekonsekwentnie) */
+  }
+  #viewport-scroll::-webkit-scrollbar{width:0;height:0;display:none}
+  /* Własny pasek — kolor ustawiam JA, więc jest identyczny w każdym trybie i przeglądarce */
+  #sbar{position:fixed;top:0;right:0;width:10px;height:100%;z-index:45;pointer-events:none}
+  #sthumb{position:absolute;top:0;right:3px;width:4px;border-radius:4px;background:var(--brass);opacity:.2}
   body{
     background:var(--ink);
     color:var(--cream);
@@ -39,7 +55,8 @@
     font-weight:300;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+    height:100%;
+    overflow:hidden;        /* body się nie przewija — robi to #viewport-scroll */
   }
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--brass);color:var(--ink)}
@@ -66,14 +83,14 @@
   .nav-toggle{display:none;background:none;border:none;color:var(--cream);cursor:pointer;font-size:1.4rem}
 
   /* ---------- HERO / KEN BURNS ---------- */
-  .hero{position:relative;height:100svh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+  .hero{position:relative;height:100%;min-height:600px;overflow:hidden;display:flex;align-items:center}
   .kb-stage{position:absolute;inset:0;z-index:0}
   .kb-slide{
     position:absolute;inset:0;
     background-size:cover;background-position:center;
     opacity:0;
     transition:opacity 2s ease-in-out;
-    will-change:opacity;
+    will-change:opacity;   /* każde zdjęcie na własnej warstwie GPU → czyste, gładkie przenikanie */
   }
   .kb-slide.active{opacity:1}
   .kb-slide .kb-img{position:absolute;inset:0;background-size:cover;background-position:center top;will-change:transform}
@@ -121,6 +138,8 @@
 
   /* ---------- SECTIONS ---------- */
   section{padding:clamp(48px,7vh,80px) clamp(20px,5vw,64px);position:relative;background:#171513}
+  /* (Usunięto content-visibility — jego szacunki wysokości sekcji powodowały w Chrome na iOS
+     „kurczenie się" strony przy przewijaniu i puste, czarne miejsce pod stopką.) */
   .hero + section::before,section + section::before{content:'';position:absolute;top:0;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);
     height:1px;background:var(--brass);opacity:.3}
   .sec-label{font-size:.9rem;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
@@ -150,13 +169,8 @@
   /* GALLERY */
   .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:8px}
   .gal-item{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--panel);border:1px solid var(--line-soft);cursor:pointer}
-  .gal-item .gal-img{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s ease}
+  .gal-item .gal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
   .gal-item:hover .gal-img{transform:scale(1.06)}
-  /* placeholdery galerii — PODMIEŃ na background-image:url('...') */
-  .gal-item:nth-child(4n+1) .gal-img{background:linear-gradient(135deg,#2a2418,#14120d)}
-  .gal-item:nth-child(4n+2) .gal-img{background:linear-gradient(135deg,#25211b,#12100b)}
-  .gal-item:nth-child(4n+3) .gal-img{background:linear-gradient(135deg,#2f2717,#14120d)}
-  .gal-item:nth-child(4n) .gal-img{background:linear-gradient(135deg,#221f19,#100e0a)}
   .gal-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(14,13,11,.5),transparent 50%);opacity:0;transition:opacity .4s}
   .gal-item:hover::after{opacity:1}
 
@@ -221,10 +235,10 @@
     letter-spacing:.12em;color:var(--muted);border-top:1px solid var(--line-soft)}
 
   /* LIGHTBOX */
-  .lb{position:fixed;inset:0;z-index:100;background:rgba(8,7,6,.95);
+  .lb{position:fixed;left:0;top:0;z-index:100;background:rgba(8,7,6,.95);
     display:none;align-items:center;justify-content:center;padding:40px;
-    width:0;height:0;overflow:hidden}
-  .lb.open{display:flex;width:100%;height:100%;overflow:visible}
+    width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none}
+  .lb.open{display:flex;inset:0;width:100%;height:100%;overflow:visible;visibility:visible;pointer-events:auto}
   .lb-img{max-width:90vw;max-height:88vh;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.6)}
   .lb-close,.lb-prev,.lb-next{position:absolute;background:none;border:none;color:var(--cream);
     cursor:pointer;transition:color .2s;user-select:none}
@@ -293,11 +307,13 @@
   </div>
 </nav>
 
+<div id="viewport-scroll">
+
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <div class="kb-stage">
     <!-- PODMIEŃ placeholdery: w .kb-img wstaw background-image:url('twoje-zdjecie.jpg') -->
-    <div class="kb-slide"><div class="kb-img"></div></div>
+    <div class="kb-slide active"><div class="kb-img"></div></div>   <!-- pierwsze zdjęcie widoczne od razu, bez wjazdu z czerni -->
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
     <div class="kb-slide"><div class="kb-img"></div></div>
@@ -305,7 +321,7 @@
   <div class="hero-scrim"></div>
   <div class="hero-inner">
     <h1><span class="l1">Jakub</span><span class="l2">Reizer</span></h1>
-    <p class="hero-tag"><strong class="tag-lead">Aktor</strong> - ponad 10 lat na scenie i przed kamerą. Teatr, film, telewizja, a od niedawna także motion capture tworzone z pomocą AI.</p>
+    <p class="hero-tag"><strong class="tag-lead">Aktor</strong> - ponad 10 lat na scenie i&nbsp;przed kamerą. Teatr, film, telewizja, a&nbsp;od niedawna także motion capture tworzone z&nbsp;pomocą AI.</p>
     <div class="hero-phys">
       <div><b>181 cm</b><span>Wzrost</span></div>
       <div><b>81 kg</b><span>Waga</span></div>
@@ -331,7 +347,7 @@
 <!-- ============ DEMO ============ -->
 <section class="demo" id="demo">
   <div class="sec-label reveal">Demo</div>
-  <h2 class="sec-h reveal">Showreel i wizytówka</h2>
+  <h2 class="sec-h reveal">Showreel i&nbsp;wizytówka</h2>
   <div class="demo-grid reveal">
     <div class="demo-item">
       <h3 class="demo-title">Showreel</h3>
@@ -353,33 +369,33 @@
 <!-- ============ GALLERY ============ -->
 <section class="gallery" id="galeria">
   <div class="sec-label reveal">Galeria</div>
-  <h2 class="sec-h reveal">Headshoty i zdjęcia z planu</h2>
+  <h2 class="sec-h reveal">Headshoty i&nbsp;zdjęcia z&nbsp;planu</h2>
   <div class="gal-grid reveal">
-    <!-- Galeria używa własnych, pionowych zdjęć foto5–foto18 (kadr 3:4). PODMIEŃ nazwy/pliki wedle potrzeby -->
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_5.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_5.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_6.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_6.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_7.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_7.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_8.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_8.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_9.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_9.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_10.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_10.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_11.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_11.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_12.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_12.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_13.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_13.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_14.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_14.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_15.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_15.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_16.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_16.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_17.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_17.jpg') center/cover"></div></div>
-    <div class="gal-item" data-full="Jakub-Reizer-Aktor_18.jpg"><div class="gal-img" style="background:url('Jakub-Reizer-Aktor_18.jpg') center/cover"></div></div>
+    <!-- Galeria używa własnych, pionowych zdjęć foto5–foto18 (kadr 3:4). PODMIEŃ nazwy/pliki oraz opisy alt wedle potrzeby -->
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_5.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_5.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_6.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_6.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_7.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_7.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_8.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_8.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_9.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_9.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_10.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_10.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_11.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_11.jpg" alt="Jakub Reizer, aktor - headshot" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_12.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_12.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_13.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_13.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_14.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_14.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_15.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_15.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_16.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_16.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_17.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_17.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
+    <div class="gal-item" data-full="Jakub-Reizer-Aktor_18.jpg"><img class="gal-img" src="Jakub-Reizer-Aktor_18.jpg" alt="Jakub Reizer, aktor - zdjęcie z planu" decoding="async"></div>
   </div>
 </section>
 
 <!-- ============ ABOUT ============ -->
 <section class="about" id="about">
   <div class="sec-label reveal">O mnie</div>
-  <h2 class="sec-h reveal">Doświadczenie i warsztat</h2>
+  <h2 class="sec-h reveal">Doświadczenie i&nbsp;warsztat</h2>
   <div class="about-grid">
     <div class="reveal">
-      <p class="about-lead">Aktor teatralny, filmowy i telewizyjny. Absolwent krakowskiej <em>ASP</em>, wydziału aktorskiego <em>KSA</em> oraz Akademii Filmowej <em>AMA</em>.</p>
+      <p class="about-lead">Aktor teatralny, filmowy i&nbsp;telewizyjny. Absolwent krakowskiej <em>ASP</em>, wydziału aktorskiego <em>KSA</em> oraz Akademii Filmowej <em>AMA</em>.</p>
       <div class="stats">
         <div class="stat"><b>10+</b><span>lat doświadczenia</span></div>
         <div class="stat"><b>20+</b><span>ról filmowych</span></div>
@@ -388,9 +404,9 @@
       </div>
     </div>
     <div class="about-body reveal">
-      <p>Na co dzień aktor Krakowskiego Teatru Komedia oraz Krakowskiej Sceny Klasycznej, działającej na deskach Teatru Praska 52 w Krakowie. Mam na koncie wiele ról filmowych, teatralnych i telewizyjnych - zajmuję się także dubbingiem.</p>
-      <p>Tancerz krakowskiego zespołu tańca irlandzkiego i szkockiego Comhlan oraz wieloletni członek grupy rekonstrukcji historycznej Małopolskiej Zgrai Sarmackiej. Trenowałem szermierkę artystyczną, gram na gitarze i śpiewam.</p>
-      <p>Rzemiosło aktorskie łączę dziś z nowym językiem obrazu - wizualami generowanymi z pomocą AI, które pozwalają opowiadać historie w formie, jakiej wcześniej nie było.</p>
+      <p>Na co dzień aktor Krakowskiego Teatru Komedia oraz Krakowskiej Sceny Klasycznej, działającej na deskach Teatru Praska 52 w&nbsp;Krakowie. Mam na koncie wiele ról filmowych, teatralnych i&nbsp;telewizyjnych - zajmuję się także dubbingiem.</p>
+      <p>Tancerz krakowskiego zespołu tańca irlandzkiego i&nbsp;szkockiego Comhlan oraz wieloletni członek grupy rekonstrukcji historycznej Małopolskiej Zgrai Sarmackiej. Trenowałem szermierkę artystyczną, gram na gitarze i&nbsp;śpiewam.</p>
+      <p>Rzemiosło aktorskie łączę dziś z&nbsp;nowym językiem obrazu - wizualami generowanymi z&nbsp;pomocą AI, które pozwalają opowiadać historie w&nbsp;formie, jakiej wcześniej nie było.</p>
     </div>
   </div>
   <div class="skills-wrap reveal">
@@ -421,7 +437,7 @@
 
   <div class="cred-cols">
   <div class="cred-group reveal">
-    <h3>Film i serial <i>ekran</i></h3>
+    <h3>Film i&nbsp;serial <i>ekran</i></h3>
     <div class="cred-list" id="lista-film"></div>
   </div>
 
@@ -434,11 +450,11 @@
 
 <!-- ============ AI NICHE ============ -->
 <section class="niche" id="niche">
-  <div class="sec-label reveal">AI w filmie</div>
+  <div class="sec-label reveal">AI w&nbsp;filmie</div>
   <h2 class="sec-h reveal">Aktorstwo <em>spotyka</em> AI</h2>
   <div class="niche-grid">
     <div class="reveal">
-      <p class="niche-text">Aktorstwo to praca z emocją, obecnością i prawdą postaci. AI to nowe narzędzie obrazu. Łączę jedno z drugim - przenoszę autentyczną grę w wizuale generowane z pomocą sztucznej inteligencji, tworząc formy, których klasyczna produkcja nie umożliwia. To przestrzeń, w której rzemiosło i technologia pracują razem, zamiast się wykluczać.</p>
+      <p class="niche-text">Aktorstwo to praca z&nbsp;emocją, obecnością i&nbsp;prawdą postaci. AI to nowe narzędzie obrazu. Łączę jedno z&nbsp;drugim - przenoszę autentyczną grę w&nbsp;wizuale generowane z&nbsp;pomocą sztucznej inteligencji, tworząc formy, których klasyczna produkcja nie umożliwia. To przestrzeń, w&nbsp;której rzemiosło i&nbsp;technologia pracują razem, zamiast się wykluczać.</p>
       <div class="hero-cta" style="margin-top:34px">
         <a href="https://www.instagram.com/jakub_reizer/" target="_blank" rel="noopener" class="btn btn-ghost">Zobacz na Instagramie</a>
       </div>
@@ -455,7 +471,7 @@
 <!-- ============ CONTACT ============ -->
 <section class="contact" id="contact">
   <div class="sec-label reveal" style="justify-content:center">Kontakt</div>
-  <h2 class="sec-h reveal">Porozmawiajmy o projektach</h2>
+  <h2 class="sec-h reveal">Porozmawiajmy o&nbsp;projektach</h2>
   <div class="contact-line reveal">
     <a href="tel:+48694329630" class="contact-phone">+48 694 329 630</a>
     <a href="mailto:jakubreizer@gmail.com" class="contact-mail-sm">jakubreizer@gmail.com</a>
@@ -475,6 +491,8 @@
 
 <footer>© <span id="yr"></span> Jakub Reizer · Aktor</footer>
 
+</div><!-- /#viewport-scroll -->
+
 <!-- LIGHTBOX -->
 <div id="lightbox" class="lb" aria-hidden="true">
   <button class="lb-close" aria-label="Zamknij">&times;</button>
@@ -485,11 +503,37 @@
 </div>
 
 <script>
+  // Po odświeżeniu nie przywracaj pozycji przewijania — każde wejście zaczyna od góry,
+  // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
+  // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
+  if('scrollRestoration' in history){history.scrollRestoration='manual';}
+  // Kontener przewijania (przewija się on, nie okno) — to eliminuje lukę Chrome iOS pod stopką.
+  var SC=document.getElementById('viewport-scroll');
+  // Własny pasek przewijania — kolor stały (brązowy), niezależny od trybu i przeglądarki.
+  (function(){
+    if(!SC) return;
+    var bar=document.createElement('div'); bar.id='sbar';
+    var thumb=document.createElement('div'); thumb.id='sthumb';
+    bar.appendChild(thumb); document.body.appendChild(bar);
+    function upd(){
+      var ch=SC.clientHeight, sh=SC.scrollHeight, st=SC.scrollTop;
+      if(sh<=ch+1){ bar.style.display='none'; return; }
+      bar.style.display='block';
+      var th=Math.max(30, ch*ch/sh);
+      var top=(ch-th)*(st/(sh-ch));
+      thumb.style.height=th+'px';
+      thumb.style.transform='translateY('+top+'px)';
+    }
+    SC.addEventListener('scroll',upd,{passive:true});
+    addEventListener('resize',upd);
+    addEventListener('load',upd);
+    upd();
+  })();
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
   const nav=document.getElementById('nav');
-  addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  SC.addEventListener('scroll',()=>nav.classList.toggle('solid',SC.scrollTop>60),{passive:true});
   // HERO — przełączanie zdjęć sterowane JS (niezawodne na PC i telefonie,
   // bez kruchych animation-delay, które rozjeżdżały się na mobile)
   (function(){
@@ -498,11 +542,18 @@
     let idx=0;
     slides[0].classList.add('active');
     if(slides.length<2)return;
-    setInterval(()=>{
+    let timer=null;
+    function step(){                       // klasyczne przenikanie — dokładnie jak w oryginale
       slides[idx].classList.remove('active');
       idx=(idx+1)%slides.length;
       slides[idx].classList.add('active');
-    },6000); // co 6 sekund zmiana zdjęcia (2s przenikanie + ~4s pauza)
+    }
+    function start(){ if(!timer) timer=setInterval(step,5000); } // co 5 s (2s przenikania)
+    function stop(){ if(timer){clearInterval(timer);timer=null;} }
+    // Pokaz leci CAŁY CZAS, niezależnie od pozycji na stronie.
+    start();
+    // Pauza tylko gdy karta jest w tle (oszczędność baterii — i tak nic wtedy nie widać).
+    document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
   })();
   // reveal — odporne na wysokie sekcje (np. galeria na telefonie) i szybki scroll
   const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -8% 0px'});
@@ -513,7 +564,11 @@
       if(r.top < window.innerHeight*0.94 && r.bottom > 0){el.classList.add('in');io.unobserve(el);}
     });
   }
-  addEventListener('scroll',revealVisible,{passive:true});
+  SC.addEventListener('scroll',revealVisible,{passive:true});
+  // odsłoń od razu to, co widoczne po (prze)ładowaniu i przy powrocie z bfcache (pageshow)
+  addEventListener('load',revealVisible);
+  addEventListener('pageshow',revealVisible);
+  revealVisible();
   // bezpiecznik okresowy: gwarantuje odsłonięcie tego, co jest w polu widzenia,
   // nawet gdyby observer i scroll zawiodły (np. na niektórych telefonach)
   let revChecks=0;
@@ -521,8 +576,21 @@
     revealVisible();
     if(++revChecks>40 || !document.querySelector('.reveal:not(.in)')) clearInterval(revTimer);
   },250);
-  // close mobile menu on link click
-  document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
+  // twardy bezpiecznik: po 1,2 s odsłoń absolutnie wszystko, żeby żadna sekcja
+  // nie mogła zostać niewidoczna (czarna) dłużej niż moment — niezależnie od urządzenia
+  setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{el.classList.add('in');io.unobserve(el);}),1200);
+  // Kotwice (#demo, #galeria, …) — przewijają KONTENER (nie okno), więc obsługujemy je jawnie.
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var id=a.getAttribute('href').slice(1);
+      if(!id){ return; }
+      var t=document.getElementById(id);
+      if(!t){ return; }
+      e.preventDefault();
+      t.scrollIntoView({behavior:'smooth',block:'start'});
+      var nl=document.getElementById('navlinks'); if(nl) nl.classList.remove('open');
+    });
+  });
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
   function resetYT(el){
     const id=el.getAttribute('data-yt');
@@ -569,9 +637,14 @@
     const counter=lb.querySelector('.lb-counter');
     let idx=0;
     const srcs=items.map(el=>el.getAttribute('data-full'));
+    const alts=items.map(el=>{
+      const im=el.querySelector('img');
+      return (im&&im.alt)||'Jakub Reizer, aktor - zdjęcie z galerii';
+    });
     function show(i){
       idx=(i+srcs.length)%srcs.length;
       img.src=srcs[idx];
+      img.alt=alts[idx];
       counter.textContent=(idx+1)+' / '+srcs.length;
     }
     function open(i){show(i);lb.classList.add('open');lb.setAttribute('aria-hidden','false');}
