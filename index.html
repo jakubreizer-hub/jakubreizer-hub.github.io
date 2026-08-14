@@ -128,23 +128,8 @@
 
   /* ---------- SECTIONS ---------- */
   section{padding:clamp(48px,7vh,80px) clamp(20px,5vw,64px);position:relative;background:#171513}
-  /* iOS Safari: renderuj każdą sekcję niezależnie. Bez tego Safari na iPhonie budował
-     jedną wielką warstwę malowania (ponad limit iOS) i dół strony wychodził czarny do
-     czasu repaintu (scroll / wygaszenie ekranu). content-visibility maluje sekcję dopiero,
-     gdy wjeżdża w ekran, więc problem znika. contain-intrinsic-size stabilizuje pasek scrolla. */
-  .about,.credits,.niche{
-    content-visibility:auto;
-    contain-intrinsic-size:600px;        /* fallback dla starszych przeglądarek */
-    contain-intrinsic-size:auto 600px;   /* nowsze: zapamiętuje realną wysokość po pierwszym renderze */
-  }
-  .gallery{
-    content-visibility:auto;
-    contain-intrinsic-size:1600px;
-    contain-intrinsic-size:auto 1600px;
-  }
-  /* UWAGA: sekcja Kontakt i stopka CELOWO bez content-visibility. To ostatnie elementy na dole;
-     leniwe renderowanie zostawiało pod nimi czarny placeholder w Chrome („czarne tło pod kontaktem").
-     Renderujemy je od razu — środkowe sekcje wystarczą, żeby nie powstała jedna wielka warstwa. */
+  /* (Usunięto content-visibility — jego szacunki wysokości sekcji powodowały w Chrome na iOS
+     „kurczenie się" strony przy przewijaniu i puste, czarne miejsce pod stopką.) */
   .hero + section::before,section + section::before{content:'';position:absolute;top:0;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);
     height:1px;background:var(--brass);opacity:.3}
   .sec-label{font-size:.9rem;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
