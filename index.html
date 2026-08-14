@@ -549,14 +549,11 @@
       idx=(idx+1)%slides.length;
       slides[idx].classList.add('active');
     }
-    function start(){ if(!timer) timer=setInterval(step,6000); } // 2s przenikanie + ~4s pauza
+    function start(){ if(!timer) timer=setInterval(step,5000); } // 2s przenikanie + ~3s pauza
     function stop(){ if(timer){clearInterval(timer);timer=null;} }
-    // Pauzuj pokaz, gdy hero nie jest widoczne (np. patrzysz na dół strony) lub karta w tle —
-    // zwalnia to kompozytor telefonu i eliminuje niedomalowane (czarne) obszary niżej.
-    const hero=document.querySelector('.hero');
-    if('IntersectionObserver' in window && hero){
-      new IntersectionObserver((es)=>es.forEach(e=>{(e.isIntersecting && !document.hidden)?start():stop();}),{threshold:0.01}).observe(hero);
-    } else { start(); }
+    // Pokaz leci CAŁY CZAS, niezależnie od pozycji na stronie.
+    start();
+    // Pauza tylko gdy karta jest w tle (oszczędność baterii — i tak nic wtedy nie widać).
     document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
   })();
   // reveal — odporne na wysokie sekcje (np. galeria na telefonie) i szybki scroll
