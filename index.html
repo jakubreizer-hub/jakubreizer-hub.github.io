@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0e0d0b">
 <title>Jakub Reizer - Aktor | Kraków · Warszawa</title>
 <meta name="description" content="Jakub Reizer - aktor teatralny, filmowy i telewizyjny z ponad 10-letnim doświadczeniem. Teatr, film, telewizja, a od niedawna motion capture tworzone z pomocą AI. Kraków · Warszawa.">
@@ -31,10 +31,18 @@
     --body:'Inter',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  /* tło także na html (nie tylko body): w Chrome na iOS (WKWebView), gdy przy przewijaniu
-     chowa się pasek adresu, odsłania się pas poza obszarem body — bez tła na html widać tam
-     systemową czerń („czarne pod kontaktem"). Z tłem na html odsłonięty obszar ma kolor motywu. */
-  html{scroll-behavior:smooth;background:var(--ink);overscroll-behavior-y:none}
+  /* ===== Przewijanie w kontenerze o stałej wysokości okna =====
+     To eliminuje błąd Chrome na iOS: strona nie może „wyjechać" poza swój obszar, więc
+     przeglądarka nie pokazuje pustego (czarnego) tła pod stopką. Body nie przewija się —
+     przewija się #viewport-scroll o wysokości równej oknu. */
+  html{background:var(--ink);height:100%}
+  #viewport-scroll{
+    height:100%;
+    overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:none;
+    scroll-behavior:smooth;
+  }
   body{
     background:var(--ink);
     color:var(--cream);
@@ -42,10 +50,8 @@
     font-weight:300;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
-    /* Celowo BEZ overflow-x na body. Strona nie wystaje w poziomie, a overflow na body
-       zmuszał Safari (iOS) do trzymania całej wysokiej strony jako jednej warstwy powyżej
-       limitu malowania — przez co dół wychodził czarny do czasu repaintu. Bez tego iOS
-       kafelkuje stronę normalnie i maluje każdą sekcję na bieżąco. */
+    height:100%;
+    overflow:hidden;        /* body się nie przewija — robi to #viewport-scroll */
   }
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--brass);color:var(--ink)}
@@ -72,7 +78,7 @@
   .nav-toggle{display:none;background:none;border:none;color:var(--cream);cursor:pointer;font-size:1.4rem}
 
   /* ---------- HERO / KEN BURNS ---------- */
-  .hero{position:relative;height:100svh;height:100dvh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+  .hero{position:relative;height:100%;min-height:600px;overflow:hidden;display:flex;align-items:center}
   .kb-stage{position:absolute;inset:0;z-index:0}
   .kb-slide{
     position:absolute;inset:0;
@@ -297,6 +303,8 @@
   </div>
 </nav>
 
+<div id="viewport-scroll">
+
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <div class="kb-stage">
@@ -479,6 +487,8 @@
 
 <footer>© <span id="yr"></span> Jakub Reizer · Aktor</footer>
 
+</div><!-- /#viewport-scroll -->
+
 <!-- LIGHTBOX -->
 <div id="lightbox" class="lb" aria-hidden="true">
   <button class="lb-close" aria-label="Zamknij">&times;</button>
@@ -501,14 +511,17 @@
     addEventListener('DOMContentLoaded',function(){document.body.appendChild(dbg);});
     function dbgScan(){
       if(!dbg.parentNode && document.body) document.body.appendChild(dbg);
-      var de=document.documentElement, footer=document.querySelector('footer');
-      var fb= footer ? Math.round(footer.getBoundingClientRect().bottom+window.scrollY) : 0;
-      var H= Math.max(de.scrollHeight, document.body.scrollHeight);
+      var sc=document.getElementById('viewport-scroll');
+      if(!sc){ dbg.textContent='brak #viewport-scroll'; return; }
+      var scTop=sc.getBoundingClientRect().top;
+      var footer=document.querySelector('footer');
+      var fb= footer ? Math.round(footer.getBoundingClientRect().bottom - scTop + sc.scrollTop) : 0;
+      var H= sc.scrollHeight;
       var below=[];
-      document.querySelectorAll('body *').forEach(function(el){
+      sc.querySelectorAll('*').forEach(function(el){
         if(el===dbg) return;
         var cs=getComputedStyle(el);
-        var b=Math.round(el.getBoundingClientRect().bottom+window.scrollY);
+        var b=Math.round(el.getBoundingClientRect().bottom - scTop + sc.scrollTop);
         if(b> fb+2 && el.getBoundingClientRect().height>2){
           below.push({t:el.tagName,c:(el.className||'').toString().slice(0,22),i:el.id,b:b,
             h:Math.round(el.getBoundingClientRect().height),p:cs.position,d:cs.display});
@@ -516,19 +529,19 @@
       });
       below.sort(function(a,b){return b.b-a.b;});
       var vvH = window.visualViewport ? Math.round(window.visualViewport.height) : 0;
-      var maxScroll = Math.round(H - window.innerHeight);
-      var txt='innerH:'+window.innerHeight+'  vvH:'+vvH+'  scrollH:'+H+'\n'+
-              'scrollY:'+Math.round(window.scrollY)+'  maxScroll:'+maxScroll+'\n'+
+      var maxScroll = Math.round(H - sc.clientHeight);
+      var txt='clientH:'+sc.clientHeight+'  innerH:'+window.innerHeight+'  vvH:'+vvH+'\n'+
+              'scrollTop:'+Math.round(sc.scrollTop)+'  maxScroll:'+maxScroll+'  scrollH:'+H+'\n'+
               'stopka dół:'+fb+'  NADMIAR:'+(H-fb)+'px\n'+
               'elementów pod stopką: '+below.length+'\n';
       below.slice(0,5).forEach(function(o){
         txt+='• '+o.t+(o.i?'#'+o.i:'')+(o.c?'.'+o.c:'')+' | dół:'+o.b+' h:'+o.h+' '+o.p+'/'+o.d+'\n';
       });
-      if(!below.length) txt+='(nic nie wystaje — nadmiar bierze się z body/html, nie z elementu)';
+      if(!below.length) txt+='(nic nie wystaje pod stopką)';
       dbg.textContent=txt;
     }
     addEventListener('load',function(){dbgScan();setTimeout(dbgScan,800);setTimeout(dbgScan,2500);});
-    addEventListener('scroll',function(){dbgScan();},{passive:true});
+    addEventListener('DOMContentLoaded',function(){var s=document.getElementById('viewport-scroll'); if(s) s.addEventListener('scroll',dbgScan,{passive:true});});
   }
   // ====== koniec panelu diagnostycznego ======
 
@@ -536,36 +549,13 @@
   // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
   // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
-  // ====== NAPRAWA luki pod stopką w Chrome na iOS ======
-  // Gdy chowa się pasek przeglądarki, okno rośnie, ale Chrome iOS nie dosuwa strony do końca
-  // treści — zostaje pusty (ciemny) obszar pod stopką. Przy każdej zmianie wielkości okna
-  // sprawdzamy, czy jesteśmy przewinięci poniżej realnego końca, i jeśli tak — dosuwamy z powrotem.
-  (function(){
-    function clampToEnd(){
-      var max = Math.max(0, (document.scrollingElement||document.documentElement).scrollHeight - window.innerHeight);
-      if(window.scrollY > max + 1){ window.scrollTo(0, max); }
-    }
-    addEventListener('resize', clampToEnd, {passive:true});
-    addEventListener('orientationchange', function(){ setTimeout(clampToEnd,250); });
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize', clampToEnd);
-      window.visualViewport.addEventListener('scroll', clampToEnd);
-    }
-    // dodatkowo tuż po zatrzymaniu przewijania (na wypadek, gdy resize nie zdąży się odpalić)
-    var st;
-    addEventListener('scroll', function(){ clearTimeout(st); st=setTimeout(clampToEnd,120); }, {passive:true});
-  })();
-  // ====== koniec naprawy luki ======
-  // iOS Safari: delikatne wymuszenie repaintu po załadowaniu i przy powrocie na stronę
-  // (to samo, co robi wygaszenie/włączenie ekranu) — dosuwa malowanie, gdyby coś zostało czarne.
-  function nudgeRepaint(){ const y=window.scrollY||0; window.scrollTo(0,y+1); window.scrollTo(0,y); }
-  addEventListener('load',()=>{ requestAnimationFrame(nudgeRepaint); });
-  addEventListener('pageshow',()=>{ requestAnimationFrame(nudgeRepaint); });
+  // Kontener przewijania (przewija się on, nie okno) — to eliminuje lukę Chrome iOS pod stopką.
+  var SC=document.getElementById('viewport-scroll');
   // year
   document.getElementById('yr').textContent = new Date().getFullYear();
   // nav solidify
   const nav=document.getElementById('nav');
-  addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>60));
+  SC.addEventListener('scroll',()=>nav.classList.toggle('solid',SC.scrollTop>60),{passive:true});
   // HERO — przełączanie zdjęć sterowane JS (niezawodne na PC i telefonie,
   // bez kruchych animation-delay, które rozjeżdżały się na mobile)
   (function(){
@@ -599,7 +589,7 @@
       if(r.top < window.innerHeight*0.94 && r.bottom > 0){el.classList.add('in');io.unobserve(el);}
     });
   }
-  addEventListener('scroll',revealVisible,{passive:true});
+  SC.addEventListener('scroll',revealVisible,{passive:true});
   // odsłoń od razu to, co widoczne po (prze)ładowaniu i przy powrocie z bfcache (pageshow)
   addEventListener('load',revealVisible);
   addEventListener('pageshow',revealVisible);
@@ -614,8 +604,18 @@
   // twardy bezpiecznik: po 1,2 s odsłoń absolutnie wszystko, żeby żadna sekcja
   // nie mogła zostać niewidoczna (czarna) dłużej niż moment — niezależnie od urządzenia
   setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{el.classList.add('in');io.unobserve(el);}),1200);
-  // close mobile menu on link click
-  document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navlinks').classList.remove('open')));
+  // Kotwice (#demo, #galeria, …) — przewijają KONTENER (nie okno), więc obsługujemy je jawnie.
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var id=a.getAttribute('href').slice(1);
+      if(!id){ return; }
+      var t=document.getElementById(id);
+      if(!t){ return; }
+      e.preventDefault();
+      t.scrollIntoView({behavior:'smooth',block:'start'});
+      var nl=document.getElementById('navlinks'); if(nl) nl.classList.remove('open');
+    });
+  });
   // YouTube lazy load: miniatura → odtwarzacz po kliknięciu
   function resetYT(el){
     const id=el.getAttribute('data-yt');
