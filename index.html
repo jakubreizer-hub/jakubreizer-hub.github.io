@@ -498,52 +498,6 @@
 </div>
 
 <script>
-  // ====== PANEL DIAGNOSTYCZNY — widoczny tylko po wejściu na adres z /#debug ======
-  // Zwykli odwiedzający go nie widzą. Ty wchodzisz na jakubreizer.pl/#debug, zjeżdżasz na dół,
-  // robisz zrzut — panel pokazuje, który element tworzy puste miejsce pod stopką.
-  if(location.hash.indexOf('debug')>=0){
-    var dbg=document.createElement('div');
-    dbg.style.cssText='position:fixed;left:6px;top:6px;z-index:99999;max-width:94vw;'+
-      'background:rgba(255,235,0,.95);color:#000;font:12px/1.4 monospace;padding:8px 10px;'+
-      'border:2px solid #000;border-radius:6px;white-space:pre-wrap;pointer-events:none';
-    dbg.textContent='diagnostyka…';
-    addEventListener('DOMContentLoaded',function(){document.body.appendChild(dbg);});
-    function dbgScan(){
-      if(!dbg.parentNode && document.body) document.body.appendChild(dbg);
-      var sc=document.getElementById('viewport-scroll');
-      if(!sc){ dbg.textContent='brak #viewport-scroll'; return; }
-      var scTop=sc.getBoundingClientRect().top;
-      var footer=document.querySelector('footer');
-      var fb= footer ? Math.round(footer.getBoundingClientRect().bottom - scTop + sc.scrollTop) : 0;
-      var H= sc.scrollHeight;
-      var below=[];
-      sc.querySelectorAll('*').forEach(function(el){
-        if(el===dbg) return;
-        var cs=getComputedStyle(el);
-        var b=Math.round(el.getBoundingClientRect().bottom - scTop + sc.scrollTop);
-        if(b> fb+2 && el.getBoundingClientRect().height>2){
-          below.push({t:el.tagName,c:(el.className||'').toString().slice(0,22),i:el.id,b:b,
-            h:Math.round(el.getBoundingClientRect().height),p:cs.position,d:cs.display});
-        }
-      });
-      below.sort(function(a,b){return b.b-a.b;});
-      var vvH = window.visualViewport ? Math.round(window.visualViewport.height) : 0;
-      var maxScroll = Math.round(H - sc.clientHeight);
-      var txt='clientH:'+sc.clientHeight+'  innerH:'+window.innerHeight+'  vvH:'+vvH+'\n'+
-              'scrollTop:'+Math.round(sc.scrollTop)+'  maxScroll:'+maxScroll+'  scrollH:'+H+'\n'+
-              'stopka dół:'+fb+'  NADMIAR:'+(H-fb)+'px\n'+
-              'elementów pod stopką: '+below.length+'\n';
-      below.slice(0,5).forEach(function(o){
-        txt+='• '+o.t+(o.i?'#'+o.i:'')+(o.c?'.'+o.c:'')+' | dół:'+o.b+' h:'+o.h+' '+o.p+'/'+o.d+'\n';
-      });
-      if(!below.length) txt+='(nic nie wystaje pod stopką)';
-      dbg.textContent=txt;
-    }
-    addEventListener('load',function(){dbgScan();setTimeout(dbgScan,800);setTimeout(dbgScan,2500);});
-    addEventListener('DOMContentLoaded',function(){var s=document.getElementById('viewport-scroll'); if(s) s.addEventListener('scroll',dbgScan,{passive:true});});
-  }
-  // ====== koniec panelu diagnostycznego ======
-
   // Po odświeżeniu nie przywracaj pozycji przewijania — każde wejście zaczyna od góry,
   // tak jak pierwsze (inaczej reload lądował w środku strony na jeszcze nieodsłoniętych,
   // czyli chwilowo „czarnych", sekcjach — stąd czarne pole pod kontaktem na telefonie).
